@@ -16,7 +16,7 @@
 - (6): Able to add own functions per platform
 
 ## Roadmap
-- [ ] Set up hello world build system
+- [x] Set up hello world build system
 - [x] Set up per-module unit testing
 - [ ] ISA investigation
 - [ ] ISA implementation
@@ -34,3 +34,27 @@ Loop:
 
 
 Provide stack overflow and underflow hooks
+
+## ISA implementation
+- `LOAD [n]`: push value at addr n to stack
+- `STORE [n]`: pop stack and save at addr n
+- `PUSH_IMM [n]`: push value n to stack
+- `DUP`: duplicate top item on stack
+- `SWAP`: swap top 2 items on stack
+- `JUMP [n]`: unconditional branch to addr n
+- `JUMP(EQ|NEQ|LT|GT|LEQ|GEQ) [n]`: conditional branch to n based on top 2 items on stack
+- Binary ops take 2 items from stack and push result to stack:
+	- `ADD`: addition
+	- `USUB`: unsigned subtract
+	- `SSUB`: signed subtract
+	- `UMUL`: unsigned multiply
+	- `SMUL`: signed multiply
+	- `DIV`: unsigned division
+	- `AND`: bitwise and 
+	- `OR`: bitwise or
+	- `XOR`: bitwise xor
+	- `MOD`: modulo
+- Unary ops take 1 item from stack and push result to stack:
+	- `INC`: increment
+	- `DEC`: decrement
+	- `INV`: bitwise invert

@@ -28,7 +28,7 @@ void vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
-    case VM_OPCODE_PUSH_IMM:
+    case VM_OPCODE_LOAD_IMM:
     {
         vm_PushStack(s, vm_GetMemAndIncrememt(s));
     }
@@ -60,14 +60,10 @@ void vm_ProcessNextOpcode(vm_state_t * s)
     { \
         vm_uint r = vm_PopStack(s); \
         vm_uint l = vm_PopStack(s); \
+        vm_uint jumpDestination = vm_GetMemAndIncrememt(s); \
         if (l op r) \
         { \
-            s->pc = &s->mem[vm_GetMemAndIncrememt(s)]; \
-        } \
-        else \
-        { \
-            /* Throw away operand if jump not taken */ \
-            (void)vm_GetMemAndIncrememt(s); \
+            s->pc = &s->mem[jumpDestination]; \
         } \
     } \
     break;

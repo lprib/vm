@@ -84,8 +84,8 @@ TEST_DEFINE_CASE(Store)
     ASSERT(MemWordsConsumed() == 2);
 }
 
-TEST_DEFINE_CASE(PushImm)
-    ResetState(VM_OPCODE_PUSH_IMM, 12, 0, 0);
+TEST_DEFINE_CASE(LoadImm)
+    ResetState(VM_OPCODE_LOAD_IMM, 12, 0, 0);
     vm_ProcessNextOpcode(&test_state);
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);
@@ -122,7 +122,6 @@ TEST_DEFINE_CASE(UnaryOps)
     ResetState(VM_OPCODE_INC, 0, 3, 0);
     vm_ProcessNextOpcode(&test_state);
     ASSERT(ItemsOnStack() == 2);
-    printf("%d\n", *test_state.sp);
     ASSERT(*test_state.sp == 4);
     ASSERT(MemWordsConsumed() == 1);
 }
@@ -163,7 +162,7 @@ int main(void)
 {
     test_Load();
     test_Store();
-    test_PushImm();
+    test_LoadImm();
     test_Dup();
     test_Swap();
     test_BinaryOps();

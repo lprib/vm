@@ -36,7 +36,7 @@ enum
 {
     VM_OPCODE_LOAD,
     VM_OPCODE_STORE,
-    VM_OPCODE_PUSH_IMM,
+    VM_OPCODE_LOAD_IMM,
     VM_OPCODE_DUP,
     VM_OPCODE_SWAP,
     VM_OPCODE_JUMP,
@@ -54,6 +54,6 @@ enum
 };
 typedef vm_uint vm_opcode_t;
 
-// clang-format off
+// clang-format on
 
 #endif

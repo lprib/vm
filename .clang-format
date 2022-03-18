@@ -7,7 +7,6 @@ BinPackArguments: false
 BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
 
-# Braces on the same line, except for functions
 BreakBeforeBraces: Allman
 
 AlwaysBreakAfterReturnType: None
