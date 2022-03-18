@@ -1,0 +1,19 @@
+IndentWidth: 4
+DerivePointerAlignment: false
+PointerAlignment: Middle
+AlignAfterOpenBracket: AlwaysBreak
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+
+# Braces on the same line, except for functions
+BreakBeforeBraces: Allman
+
+AlwaysBreakAfterReturnType: None
+
+SortIncludes: CaseInsensitive
+
+# Regroup includes based on categories (main header, library <>, other header "")
+IncludeBlocks: Regroup
+
+# vim: set filetype=yaml:
