@@ -32,8 +32,5 @@ Loop:
 	- exe opcode
 	- update PC
 
-### IO
-IO with a register with instruction. Used for platform specifics, but with unified API
 
-### Arrays
-
+Provide stack overflow and underflow hooks

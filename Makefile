@@ -34,9 +34,7 @@ RUN_TESTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=%)
 # The rule substitues the executable basename (no path) with the path to
 # executable to actually execute
 $(RUN_TESTS):%:$(TEST_OUT_DIR)/%
-	@echo Running test $<.
 	@./$<
-	@echo
 
 test: $(RUN_TESTS)
 

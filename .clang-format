@@ -2,6 +2,7 @@ IndentWidth: 4
 DerivePointerAlignment: false
 PointerAlignment: Middle
 AlignAfterOpenBracket: AlwaysBreak
+AlignEscapedNewlines: DontAlign
 BinPackArguments: false
 BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
@@ -15,5 +16,7 @@ SortIncludes: CaseInsensitive
 
 # Regroup includes based on categories (main header, library <>, other header "")
 IncludeBlocks: Regroup
+
+MacroBlockBegin: "^TEST_DEFINE_CASE"
 
 # vim: set filetype=yaml:
