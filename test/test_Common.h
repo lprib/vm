@@ -1,5 +1,7 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef TEST_COMMON_H
+#define TEST_COMMON_H
+
+#include "vm_State.h"
 
 #include <assert.h>
 #include <stdio.h>

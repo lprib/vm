@@ -3,10 +3,15 @@
 
 #include "vm_BaseTypes.h"
 
+#include <stdint.h>
+
 typedef struct
 {
-    vm_uint pc;
-    vm_uint sp;
+    // Points inside of mem
+    vm_uint * pc;
+    // Points inside of stack
+    vm_uint * sp;
+
     vm_uint * stack;
     vm_uint stack_size;
     vm_uint * mem;
@@ -23,5 +28,9 @@ void vm_InitState(
 void vm_PushStack(vm_state_t * state, vm_uint val);
 
 vm_uint vm_PopStack(vm_state_t * state);
+
+vm_uint vm_PeekStack(vm_state_t * state, vm_uint index);
+
+vm_uint vm_GetMemAndIncrememt(vm_state_t * state);
 
 #endif

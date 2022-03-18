@@ -16,20 +16,32 @@ void vm_InitState(
     state->mem = mem;
     state->mem_size = mem_size;
 
-    state->pc = 0;
+    state->pc = mem;
     // initially points off the stack since nothing has been pushed
-    state->sp = stack_size;
+    state->sp = stack + stack_size;
 }
 
 void vm_PushStack(vm_state_t * state, vm_uint val)
 {
     state->sp--;
-    state->stack[state->sp] = val;
+    *state->sp = val;
 }
 
 vm_uint vm_PopStack(vm_state_t * state)
 {
-    vm_uint ret = state->stack[state->sp];
+    vm_uint ret = *state->sp;
     state->sp++;
+    return ret;
+}
+
+vm_uint vm_PeekStack(vm_state_t * state, vm_uint index)
+{
+    return state->sp[index];
+}
+
+vm_uint vm_GetMemAndIncrememt(vm_state_t * state)
+{
+    vm_uint ret = *state->pc;
+    state->pc++;
     return ret;
 }
