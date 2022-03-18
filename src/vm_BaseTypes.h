@@ -1,5 +1,5 @@
-#ifndef VM_BASETYPES_H
-#define VM_BASETYPES_H
+#ifndef VM_BASE_TYPES_H
+#define VM_BASE_TYPES_H
 
 #include <stdint.h>
 
