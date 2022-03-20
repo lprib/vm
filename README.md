@@ -38,9 +38,12 @@ Provide stack overflow and underflow hooks
 ## ISA implementation
 - `LOAD [n]`: push value at addr n to stack
 - `STORE [n]`: pop stack and save at addr n
-- `PUSH_IMM [n]`: push value n to stack
+- `LOAD_IMM [n]`: push value n to stack
 - `DUP`: duplicate top item on stack
 - `SWAP`: swap top 2 items on stack
+- `IO [n]`: Perform IO call to function at index n, see Platform IO Interface
+- `HALT`: Halts the VM. `vm_ProcessOpcode` will return
+  `VM_PROCESS_PROGRAM_HALT` instead of a continue result.
 - `JUMP [n]`: unconditional branch to addr n
 - `JUMP(EQ|NEQ|LT|GT|LEQ|GEQ) [n]`: conditional branch to n based on top 2 items on stack
 - Binary ops take 2 items from stack and push result to stack:
@@ -64,7 +67,14 @@ arguments from the stack instead of popping them. Helps with using the stack as
 more of an extended register set. This also applies to IO function calls, which
 will peek all of their arguments if the bit is set.
 
-## Platform IO interface
+## Platform IO Interface
+IO functions are implmented by the client of this API, and can include
+arguments and a return, all `vm_uints`. Argments are popped (or peeked if peek
+bit set) from the stack. Optional return is pushed to the stack.
+
+If the function number requested by the bytecode is not an implemented function
+by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
+
 - Include `vm_PlatformInterface.h`.
 - Provide your own `vmint_IoFunctionRegistry.h"
 	- define `VM_IO_FN_REGISTRY` with X macros
