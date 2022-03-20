@@ -9,7 +9,7 @@ bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
     vm_ioFunctionRegistryItem_t * registryList;
     vm_uint registryListLength;
 
-    // TODO optimization, init this at startup?
+    // TODO optimization: init this at startup?
     vmint_GetIoFunctionRegistry(&registryList, &registryListLength);
 
     // Check whether the fnIndex is valid
@@ -25,7 +25,7 @@ bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
 
     // Fill args buffer in reverse since the oldest pushed value should be the
     // first arg
-    for (int i = registryItem->numArgs - 1; i <= 0; i--)
+    for (int i = registryItem->numArgs - 1; i >= 0; i--)
     {
         argsBuffer[i] = vm_PopStack(state);
     }

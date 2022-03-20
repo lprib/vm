@@ -69,3 +69,4 @@ Provide stack overflow and underflow hooks
 	- use input pointer to get args, output return to set return
 	- inputs come from stack, output goes to stack
 - TODO: implement IO function which delegates
+- TODO: Abstract notion of "next opcode" which can be from an array or stream

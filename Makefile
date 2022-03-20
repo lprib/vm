@@ -3,6 +3,8 @@ TEST_DIR = test
 OUT_DIR = out
 IMPL_DIR = impl
 
+# TODO add separate INC folder for public headers
+
 TEST_EXE_DIR = $(OUT_DIR)/test_exe
 IMPL_EXE_DIR = $(OUT_DIR)/impl_exe
 
@@ -17,8 +19,11 @@ TEST_EXES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_EXE_DIR)/%)
 SRC_INCLUDE_FILES = $(wildcard $(SRC_DIR)/*.h)
 TEST_INCLUDE_FILES = $(wildcard $(TEST_DIR)/*.h)
 
-CFLAGS = -Wall
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+SRC_OUT_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=$(OUT_DIR)/%.o)
 
+CC = gcc
+CFLAGS = -Wall
 
 
 # Generate folders on demand
@@ -34,11 +39,11 @@ $(IMPL_EXE_DIR): | $(OUT_DIR)
 
 # Generate out objects from main sources
 $(OUT_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_INCLUDE_FILES) | $(OUT_DIR)
-	gcc $(CFLAGS) $(SRC_INCLUDE_FLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) -c $< -o $@
 
 # Generate out objects from test sources
 $(OUT_DIR)/%.o: $(TEST_DIR)/%.c $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES)| $(OUT_DIR)
-	gcc $(CFLAGS) $(SRC_INCLUDE_FLAGS) $(TEST_INCLUDE_FLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) $(TEST_INCLUDE_FLAGS) -c $< -o $@
 
 
 # Generate test executables.
@@ -46,7 +51,7 @@ $(OUT_DIR)/%.o: $(TEST_DIR)/%.c $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES)| $(OU
 # Test exes depend on two sources: test source and UUT module source.
 # Everything else should be mocked.
 $(TEST_EXE_DIR)/test_%: $(OUT_DIR)/test_%.o $(OUT_DIR)/%.o $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES) | $(TEST_EXE_DIR)
-	gcc $(CFLAGS) $< $(word 2,$^) -o $@
+	$(CC) $(CFLAGS) $< $(word 2,$^) -o $@
 
 # Generate a phony rule for running each test suite
 RUN_TESTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=%)
@@ -60,9 +65,15 @@ $(RUN_TESTS):%:$(TEST_EXE_DIR)/%
 test: $(RUN_TESTS)
 
 
-# Generate implementation execuables.
-# TODO
+# Generate intgration test executable
+# Assumed to be a single main.c file
 
+INTEGRATION_SRC_DIR = $(IMPL_DIR)/integration_test
+$(IMPL_EXE_DIR)/integration_test: $(INTEGRATION_SRC_DIR)/main.c $(SRC_OUT_FILES) | $(IMPL_EXE_DIR)
+	$(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) $^ -o $@
+
+integration: $(IMPL_EXE_DIR)/integration_test
+	./$<
 
 clean:
 	rm -r $(OUT_DIR)
@@ -81,4 +92,4 @@ debug:
 	@echo RUN_TESTS
 	@echo $(RUN_TESTS)
 
-.PHONY: test debug
+.PHONY: test debug integration
