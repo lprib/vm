@@ -75,7 +75,39 @@ vm_uint mem[MEM_SIZE] = {
     FN_Arg3Return1,
     VM_OPCODE_IO,
     FN_MyPrint,
-    VM_OPCODE_HALT};
+
+    VM_OPCODE_LOAD_IMM,
+    10,
+    VM_OPCODE_STORE,
+    99,
+
+    // Addr 17
+    VM_OPCODE_LOAD,
+    99,
+
+    // Duplicate and print
+    VM_OPCODE_DUP,
+    VM_OPCODE_IO,
+    FN_MyPrint,
+
+    // Sub 1
+    VM_OPCODE_LOAD_IMM,
+    1,
+    VM_OPCODE_USUB,
+
+    // Dup and store
+    VM_OPCODE_DUP,
+    VM_OPCODE_STORE,
+    99,
+
+    // Jump if != 0
+    VM_OPCODE_LOAD_IMM,
+    0,
+    VM_OPCODE_JUMPNEQ,
+    17,
+
+    VM_OPCODE_HALT,
+};
 
 vm_uint stack[STACK_SIZE] = {0};
 
