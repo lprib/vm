@@ -1,6 +1,0 @@
-#ifndef VMINT_IO_FUNCTION_REGISTRY_H
-#define VMINT_IO_FUNCTION_REGISTRY_H
-
-#define IO_FN_REGISTRY
-
-#endif

@@ -1,42 +1,68 @@
 SRC_DIR = src
 TEST_DIR = test
 OUT_DIR = out
+IMPL_DIR = impl
 
-# $(TEST_OUT_SUBDIR) is where the text executables will reside
-TEST_OUT_DIR = $(OUT_DIR)/tests
+TEST_EXE_DIR = $(OUT_DIR)/test_exe
+IMPL_EXE_DIR = $(OUT_DIR)/impl_exe
 
 # include path when building source
-SRC_INCLUDES = -I$(SRC_DIR)
-# include path when building tests (SRC_INCLUDES is also required)
-TEST_INCLUDES = -I$(TEST_DIR)
+SRC_INCLUDE_FLAGS = -I$(SRC_DIR)
+# include path when building tests (SRC_INCLUDE_FLAGS is also required)
+TEST_INCLUDE_FLAGS = -I$(TEST_DIR)
 
 TEST_SOURCES = $(wildcard $(TEST_DIR)/test_*.c)
-TEST_EXES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_OUT_DIR)/%)
+TEST_EXES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_EXE_DIR)/%)
 
 SRC_INCLUDE_FILES = $(wildcard $(SRC_DIR)/*.h)
 TEST_INCLUDE_FILES = $(wildcard $(TEST_DIR)/*.h)
 
 CFLAGS = -Wall
 
+
+
+# Generate folders on demand
+
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(TEST_OUT_DIR): | $(OUT_DIR)
-	mkdir -p $(TEST_OUT_DIR)
+$(TEST_EXE_DIR): | $(OUT_DIR)
+	mkdir -p $(TEST_EXE_DIR)
 
-$(TEST_OUT_DIR)/test_%: $(TEST_DIR)/test_%.c $(SRC_DIR)/%.c $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES) | $(TEST_OUT_DIR)
-	gcc $(CFLAGS) $(SRC_INCLUDES) $(TEST_INCLUDES) $< $(word 2,$^) -o $@
+$(IMPL_EXE_DIR): | $(OUT_DIR)
+	mkdir -p $(IMPL_EXE_DIR)
+
+# Generate out objects from main sources
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_INCLUDE_FILES) | $(OUT_DIR)
+	gcc $(CFLAGS) $(SRC_INCLUDE_FLAGS) -c $< -o $@
+
+# Generate out objects from test sources
+$(OUT_DIR)/%.o: $(TEST_DIR)/%.c $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES)| $(OUT_DIR)
+	gcc $(CFLAGS) $(SRC_INCLUDE_FLAGS) $(TEST_INCLUDE_FLAGS) -c $< -o $@
+
+
+# Generate test executables.
+
+# Test exes depend on two sources: test source and UUT module source.
+# Everything else should be mocked.
+$(TEST_EXE_DIR)/test_%: $(OUT_DIR)/test_%.o $(OUT_DIR)/%.o $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES) | $(TEST_EXE_DIR)
+	gcc $(CFLAGS) $< $(word 2,$^) -o $@
 
 # Generate a phony rule for running each test suite
 RUN_TESTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=%)
 .PHONY: $(RUN_TESTS)
 
-# The rule substitues the executable basename (no path) with the path to
+# This rule substitues the executable basename (no path) with the path to
 # executable to actually execute
-$(RUN_TESTS):%:$(TEST_OUT_DIR)/%
+$(RUN_TESTS):%:$(TEST_EXE_DIR)/%
 	@./$<
 
 test: $(RUN_TESTS)
+
+
+# Generate implementation execuables.
+# TODO
+
 
 clean:
 	rm -r $(OUT_DIR)
@@ -46,8 +72,8 @@ debug:
 	@echo $(TEST_SOURCES)
 	@echo TEST_EXES
 	@echo $(TEST_EXES)
-	@echo TEST_INCLUDES
-	@echo $(TEST_INCLUDES)
+	@echo TEST_INCLUDE_FLAGS
+	@echo $(TEST_INCLUDE_FLAGS)
 	@echo SRC_INCLUDE_FILES
 	@echo $(SRC_INCLUDE_FILES)
 	@echo TEST_INCLUDE_FILES

@@ -40,6 +40,8 @@ enum
     VM_OPCODE_DUP,
     VM_OPCODE_SWAP,
     VM_OPCODE_JUMP,
+    VM_OPCODE_IO,
+    VM_OPCODE_HALT,
 #define X(name, op) VM_OPCODE_JUMP##name,
     VM_OPCODE_JUMPS
 #undef X

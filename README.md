@@ -62,7 +62,7 @@ Provide stack overflow and underflow hooks
 ## Platform IO interface
 - Include `vm_PlatformInterface.h`.
 - Provide your own `vmint_IoFunctionRegistry.h"
-	- define `IO_FN_REGISTRY` with X macros
+	- define `VM_IO_FN_REGISTRY` with X macros
 	- `X(name, numArgs, hasReturn)`
 	- `X(io_MyFunction, 2, false)`
 - `VM_DEFINE_IO_INTERFACE(name)`

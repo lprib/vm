@@ -6,10 +6,10 @@
 #include <string.h>
 
 // start at 1 since we only mock 2 elements on the stack
-vm_uint stack[100];
-vm_uint mem[100];
+static vm_uint stack[100];
+static vm_uint mem[100];
 
-vm_state_t test_state = {
+static vm_state_t test_state = {
     .pc = mem,
     .sp = stack + 100,
     .stack = stack,
@@ -25,8 +25,11 @@ ResetState(vm_uint mem0, vm_uint mem1, vm_uint stack0, vm_uint stack1)
     memset(mem, 0, sizeof(mem));
     mem[0] = mem0;
     mem[1] = mem1;
+
+    // Items go at the end since stack growns from top down
     stack[98] = stack0;
     stack[99] = stack1;
+
     test_state.pc = mem;
     test_state.sp = stack + 98;
 }
@@ -37,7 +40,13 @@ static int ItemsOnStack()
 }
 static int MemWordsConsumed() { return test_state.pc - mem; }
 
+static void ProcessNextShouldContinue()
+{
+    ASSERT(vm_ProcessNextOpcode(&test_state) == VM_PROCESS_CONTINUE);
+}
+
 // MOCKS:
+// vm_State.h
 void vm_PushStack(vm_state_t * state, vm_uint val)
 {
     test_state.sp--;
@@ -63,12 +72,22 @@ vm_uint vm_GetMemAndIncrememt(vm_state_t * state)
     return ret;
 }
 
+// vm_Io.h
+static int lastIoFnIndex = -1;
+static bool functionIsValid;
+
+bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
+{
+    lastIoFnIndex = fnIndex;
+    return functionIsValid;
+}
+
 TEST_DEFINE_CASE(Load)
     // Program: Load value at addr 51 to stack
     // Stack: 2 zeros
     ResetState(VM_OPCODE_LOAD, 50, 0, 0);
     mem[50] = 22;
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
 
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 22);
@@ -77,7 +96,7 @@ TEST_DEFINE_CASE(Load)
 
 TEST_DEFINE_CASE(Store)
     ResetState(VM_OPCODE_STORE, 50, 99, 1);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     // popped 99, now 1 on stack
     ASSERT(*test_state.sp == 1);
@@ -86,7 +105,7 @@ TEST_DEFINE_CASE(Store)
 
 TEST_DEFINE_CASE(LoadImm)
     ResetState(VM_OPCODE_LOAD_IMM, 12, 0, 0);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);
     ASSERT(MemWordsConsumed() == 2);
@@ -94,7 +113,7 @@ TEST_DEFINE_CASE(LoadImm)
 
 TEST_DEFINE_CASE(Dup)
     ResetState(VM_OPCODE_DUP, 0, 31, 0);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 31);
     ASSERT(test_state.sp[1] == 31);
@@ -103,7 +122,7 @@ TEST_DEFINE_CASE(Dup)
 
 TEST_DEFINE_CASE(Swap)
     ResetState(VM_OPCODE_SWAP, 0, 12, 34);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(test_state.sp[0] == 34);
     ASSERT(test_state.sp[1] == 12);
@@ -112,7 +131,7 @@ TEST_DEFINE_CASE(Swap)
 
 TEST_DEFINE_CASE(BinaryOps)
     ResetState(VM_OPCODE_ADD, 0, 3, 4);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     ASSERT(*test_state.sp == 7);
     ASSERT(MemWordsConsumed() == 1);
@@ -120,7 +139,7 @@ TEST_DEFINE_CASE(BinaryOps)
 
 TEST_DEFINE_CASE(UnaryOps)
     ResetState(VM_OPCODE_INC, 0, 3, 0);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(*test_state.sp == 4);
     ASSERT(MemWordsConsumed() == 1);
@@ -128,33 +147,57 @@ TEST_DEFINE_CASE(UnaryOps)
 
 TEST_DEFINE_CASE(JumpsTaken)
     ResetState(VM_OPCODE_JUMP, 55, 0, 0);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
     ResetState(VM_OPCODE_JUMPEQ, 55, 5, 5);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
     ResetState(VM_OPCODE_JUMPNEQ, 55, 4, 5);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
     ResetState(VM_OPCODE_JUMPLT, 55, 3, 2);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 }
 
 TEST_DEFINE_CASE(JumpsNotTaken)
     ResetState(VM_OPCODE_JUMPEQ, 55, 5, 4);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
 
     ResetState(VM_OPCODE_JUMPNEQ, 55, 5, 5);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
 
     ResetState(VM_OPCODE_JUMPLT, 55, 2, 3);
-    vm_ProcessNextOpcode(&test_state);
+    ProcessNextShouldContinue();
+    ASSERT(MemWordsConsumed() == 2);
+}
+
+TEST_DEFINE_CASE(Halt)
+    ResetState(VM_OPCODE_HALT, 0, 0, 0);
+    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    ASSERT(res == VM_PROCESS_PROGRAM_HALT);
+    ASSERT(MemWordsConsumed() == 1);
+}
+
+TEST_DEFINE_CASE(ValidIoCall)
+    ResetState(VM_OPCODE_IO, 10, 0, 0);
+    functionIsValid = true;
+    ProcessNextShouldContinue();
+    ASSERT(lastIoFnIndex == 10);
+    ASSERT(MemWordsConsumed() == 2);
+}
+
+TEST_DEFINE_CASE(InvalidIoCall)
+    ResetState(VM_OPCODE_IO, 5, 0, 0);
+    functionIsValid = false;
+    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    ASSERT(lastIoFnIndex == 5);
+    ASSERT(res == VM_PROCESS_ERROR_UNDEF_IO_FN);
     ASSERT(MemWordsConsumed() == 2);
 }
 
@@ -169,5 +212,8 @@ int main(void)
     test_UnaryOps();
     test_JumpsTaken();
     test_JumpsNotTaken();
+    test_Halt();
+    test_ValidIoCall();
+    test_InvalidIoCall();
     return 0;
 }

@@ -1,14 +1,17 @@
 #include "vm_ProcessOpcode.h"
 
 #include "vm_BaseTypes.h"
+#include "vm_Io.h"
 #include "vm_Opcodes.h"
 #include "vm_State.h"
 
 #include <stdio.h>
 
-void vm_ProcessNextOpcode(vm_state_t * s)
+vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 {
     vm_uint opcode = vm_GetMemAndIncrememt(s);
+
+    vm_programTickResult_t result = VM_PROCESS_CONTINUE;
 
     switch (opcode)
     {
@@ -55,6 +58,22 @@ void vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
+    case VM_OPCODE_IO:
+    {
+        vm_uint fnIndex = vm_GetMemAndIncrememt(s);
+        if (!vm_IoFnCall(s, fnIndex))
+        {
+            result = VM_PROCESS_ERROR_UNDEF_IO_FN;
+        }
+    }
+    break;
+
+    case VM_OPCODE_HALT:
+    {
+        result = VM_PROCESS_PROGRAM_HALT;
+    }
+    break;
+
 #define X(name, op) \
     case VM_OPCODE_JUMP##name: \
     { \
@@ -92,4 +111,6 @@ void vm_ProcessNextOpcode(vm_state_t * s)
         VM_OPCODE_UNARY_OPS
 #undef X
     }
+
+    return result;
 }
