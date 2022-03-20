@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define VM_INT_BITWIDTH 16
+
 typedef int16_t vm_int;
 typedef uint16_t vm_uint;
 typedef bool vm_bool;

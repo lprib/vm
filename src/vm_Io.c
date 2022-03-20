@@ -4,7 +4,7 @@
 #include "vm_PlatormInterface.h"
 #include "vm_State.h"
 
-bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
+bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex, bool peek)
 {
     vm_ioFunctionRegistryItem_t * registryList;
     vm_uint registryListLength;
@@ -27,7 +27,7 @@ bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
     // first arg
     for (int i = registryItem->numArgs - 1; i >= 0; i--)
     {
-        argsBuffer[i] = vm_PopStack(state);
+        argsBuffer[i] = peek ? vm_PeekStack(state, i) : vm_PopStack(state);
     }
 
     registryItem->callback(argsBuffer, &returnValue);

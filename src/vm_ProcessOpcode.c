@@ -5,11 +5,19 @@
 #include "vm_Opcodes.h"
 #include "vm_State.h"
 
+#include <stdbool.h>
 #include <stdio.h>
+
+#define POP_OR_PEEK(state, idx) \
+    peek ? vm_PeekStack(state, idx) : vm_PopStack(state)
 
 vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 {
     vm_uint opcode = vm_GetMemAndIncrememt(s);
+
+    bool peek = opcode & VM_PEEK_BITMASK;
+    // clear peek bit before switching
+    opcode &= ~VM_PEEK_BITMASK;
 
     vm_programTickResult_t result = VM_PROCESS_CONTINUE;
 
@@ -26,7 +34,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     case VM_OPCODE_STORE:
     {
         vm_uint addr = vm_GetMemAndIncrememt(s);
-        vm_uint val = vm_PopStack(s);
+        vm_uint val = POP_OR_PEEK(s, 0);
         s->mem[addr] = val;
     }
     break;
@@ -45,8 +53,8 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OPCODE_SWAP:
     {
-        vm_uint a = vm_PopStack(s);
-        vm_uint b = vm_PopStack(s);
+        vm_uint a = POP_OR_PEEK(s, 0);
+        vm_uint b = POP_OR_PEEK(s, 1);
         vm_PushStack(s, a);
         vm_PushStack(s, b);
     }
@@ -61,7 +69,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     case VM_OPCODE_IO:
     {
         vm_uint fnIndex = vm_GetMemAndIncrememt(s);
-        if (!vm_IoFnCall(s, fnIndex))
+        if (!vm_IoFnCall(s, fnIndex, peek))
         {
             result = VM_PROCESS_ERROR_UNDEF_IO_FN;
         }
@@ -77,8 +85,8 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define X(name, op) \
     case VM_OPCODE_JUMP##name: \
     { \
-        vm_uint r = vm_PopStack(s); \
-        vm_uint l = vm_PopStack(s); \
+        vm_uint r = POP_OR_PEEK(s, 0); \
+        vm_uint l = POP_OR_PEEK(s, 1); \
         vm_uint jumpDestination = vm_GetMemAndIncrememt(s); \
         if (l op r) \
         { \
@@ -93,8 +101,8 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define X(name, op) \
     case VM_OPCODE_##name: \
     { \
-        vm_uint r = vm_PopStack(s); \
-        vm_uint l = vm_PopStack(s); \
+        vm_uint r = POP_OR_PEEK(s, 0); \
+        vm_uint l = POP_OR_PEEK(s, 1); \
         vm_PushStack(s, VM_TO_UNSIGNED(op)); \
     } \
     break;
@@ -104,7 +112,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define X(name, op) \
     case VM_OPCODE_##name: \
     { \
-        vm_uint n = vm_PopStack(s); \
+        vm_uint n = POP_OR_PEEK(s, 0); \
         vm_PushStack(s, op); \
     } \
     break;

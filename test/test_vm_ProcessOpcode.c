@@ -101,6 +101,13 @@ TEST_DEFINE_CASE(Store)
     // popped 99, now 1 on stack
     ASSERT(*test_state.sp == 1);
     ASSERT(MemWordsConsumed() == 2);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_STORE, 50, 99, 1);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 2);
+    // popped 99, now 1 on stack
+    ASSERT(*test_state.sp == 99);
+    ASSERT(MemWordsConsumed() == 2);
 }
 
 TEST_DEFINE_CASE(LoadImm)
@@ -127,6 +134,15 @@ TEST_DEFINE_CASE(Swap)
     ASSERT(test_state.sp[0] == 34);
     ASSERT(test_state.sp[1] == 12);
     ASSERT(MemWordsConsumed() == 1);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_SWAP, 0, 12, 34);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 4);
+    ASSERT(test_state.sp[0] == 34);
+    ASSERT(test_state.sp[1] == 12);
+    ASSERT(test_state.sp[2] == 12);
+    ASSERT(test_state.sp[3] == 34);
+    ASSERT(MemWordsConsumed() == 1);
 }
 
 TEST_DEFINE_CASE(BinaryOps)
@@ -135,12 +151,40 @@ TEST_DEFINE_CASE(BinaryOps)
     ASSERT(ItemsOnStack() == 1);
     ASSERT(*test_state.sp == 7);
     ASSERT(MemWordsConsumed() == 1);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_ADD, 0, 3, 4);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(test_state.sp[0] == 7);
+    ASSERT(test_state.sp[1] == 3);
+    ASSERT(test_state.sp[2] == 4);
+    ASSERT(MemWordsConsumed() == 1);
+
+    ResetState(VM_OPCODE_USUB, 0, 2, 10);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 1);
+    ASSERT(*test_state.sp == 8);
+    ASSERT(MemWordsConsumed() == 1);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_USUB, 0, 2, 10);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(test_state.sp[0] == 8);
+    ASSERT(test_state.sp[1] == 2);
+    ASSERT(test_state.sp[2] == 10);
+    ASSERT(MemWordsConsumed() == 1);
 }
 
 TEST_DEFINE_CASE(UnaryOps)
     ResetState(VM_OPCODE_INC, 0, 3, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
+    ASSERT(*test_state.sp == 4);
+    ASSERT(MemWordsConsumed() == 1);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_INC, 0, 3, 0);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 4);
     ASSERT(MemWordsConsumed() == 1);
 }
@@ -160,6 +204,12 @@ TEST_DEFINE_CASE(JumpsTaken)
 
     ResetState(VM_OPCODE_JUMPLT, 55, 3, 2);
     ProcessNextShouldContinue();
+    ASSERT(test_state.pc - mem == 55);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_JUMPNEQ, 55, 4, 5);
+    ProcessNextShouldContinue();
+    ASSERT(test_state.sp[0] == 4);
+    ASSERT(test_state.sp[1] == 5);
     ASSERT(test_state.pc - mem == 55);
 }
 
@@ -184,7 +234,7 @@ TEST_DEFINE_CASE(Halt)
     ASSERT(MemWordsConsumed() == 1);
 }
 
-TEST_DEFINE_CASE(ValidIoCall)
+TEST_DEFINE_CASE(IoCallValid)
     ResetState(VM_OPCODE_IO, 10, 0, 0);
     functionIsValid = true;
     ProcessNextShouldContinue();
@@ -192,7 +242,7 @@ TEST_DEFINE_CASE(ValidIoCall)
     ASSERT(MemWordsConsumed() == 2);
 }
 
-TEST_DEFINE_CASE(InvalidIoCall)
+TEST_DEFINE_CASE(IoCallInvalid)
     ResetState(VM_OPCODE_IO, 5, 0, 0);
     functionIsValid = false;
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
@@ -213,7 +263,7 @@ int main(void)
     test_JumpsTaken();
     test_JumpsNotTaken();
     test_Halt();
-    test_ValidIoCall();
-    test_InvalidIoCall();
+    test_IoCallValid();
+    test_IoCallInvalid();
     return 0;
 }

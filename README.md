@@ -59,6 +59,11 @@ Provide stack overflow and underflow hooks
 	- `DEC`: decrement
 	- `INV`: bitwise invert
 
+Each opcode can be ORed with `VM_PEEK_BITMASK`, which will make it peek its
+arguments from the stack instead of popping them. Helps with using the stack as
+more of an extended register set. This also applies to IO function calls, which
+will peek all of their arguments if the bit is set.
+
 ## Platform IO interface
 - Include `vm_PlatformInterface.h`.
 - Provide your own `vmint_IoFunctionRegistry.h"
@@ -70,3 +75,4 @@ Provide stack overflow and underflow hooks
 	- inputs come from stack, output goes to stack
 - TODO: implement IO function which delegates
 - TODO: Abstract notion of "next opcode" which can be from an array or stream
+	- WONT DO: need to support jumps

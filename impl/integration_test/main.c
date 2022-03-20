@@ -81,13 +81,10 @@ vm_uint mem[MEM_SIZE] = {
     VM_OPCODE_STORE,
     99,
 
-    // Addr 17
-    VM_OPCODE_LOAD,
+    VM_OPCODE_LOAD, // Addr 17
     99,
 
-    // Duplicate and print
-    VM_OPCODE_DUP,
-    VM_OPCODE_IO,
+    VM_PEEK_BITMASK | VM_OPCODE_IO,
     FN_MyPrint,
 
     // Sub 1
@@ -95,9 +92,7 @@ vm_uint mem[MEM_SIZE] = {
     1,
     VM_OPCODE_USUB,
 
-    // Dup and store
-    VM_OPCODE_DUP,
-    VM_OPCODE_STORE,
+    VM_PEEK_BITMASK | VM_OPCODE_STORE,
     99,
 
     // Jump if != 0

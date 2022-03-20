@@ -3,6 +3,9 @@
 
 #include "vm_BaseTypes.h"
 
+// store the peek flag in the high bits of opcode
+#define VM_PEEK_BITMASK (1 << (VM_INT_BITWIDTH - 1))
+
 #define VM_OPCODE_JUMPS \
     X(EQ, ==) \
     X(NEQ, !=) \
