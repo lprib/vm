@@ -60,6 +60,12 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
+    case VM_OPCODE_DROP:
+    {
+        (void)vm_PopStack(s);
+    }
+    break;
+
     case VM_OPCODE_JUMP:
     {
         s->pc = &s->mem[vm_GetMemAndIncrememt(s)];

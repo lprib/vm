@@ -145,6 +145,14 @@ TEST_DEFINE_CASE(Swap)
     ASSERT(MemWordsConsumed() == 1);
 }
 
+TEST_DEFINE_CASE(Drop)
+    ResetState(VM_OPCODE_DROP, 0, 31, 5);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 1);
+    ASSERT(*test_state.sp == 5);
+    ASSERT(MemWordsConsumed() == 1);
+}
+
 TEST_DEFINE_CASE(BinaryOps)
     ResetState(VM_OPCODE_ADD, 0, 3, 4);
     ProcessNextShouldContinue();
@@ -258,6 +266,7 @@ int main(void)
     test_LoadImm();
     test_Dup();
     test_Swap();
+    test_Drop();
     test_BinaryOps();
     test_UnaryOps();
     test_JumpsTaken();

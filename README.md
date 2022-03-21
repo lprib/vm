@@ -41,6 +41,7 @@ Provide stack overflow and underflow hooks
 - `LOAD_IMM [n]`: push value n to stack
 - `DUP`: duplicate top item on stack
 - `SWAP`: swap top 2 items on stack
+- `DROP`: remove top element from stack
 - `IO [n]`: Perform IO call to function at index n, see Platform IO Interface
 - `HALT`: Halts the VM. `vm_ProcessOpcode` will return
   `VM_PROCESS_PROGRAM_HALT` instead of a continue result.

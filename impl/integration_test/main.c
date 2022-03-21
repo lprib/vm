@@ -84,8 +84,19 @@ vm_uint mem[MEM_SIZE] = {
     VM_OPCODE_LOAD, // Addr 17
     99,
 
+    VM_OPCODE_DUP,
+    // stack: i i
+    VM_OPCODE_LOAD_IMM,
+    10,
+    // stack: 10 i i
+    VM_OPCODE_SWAP,
+    // stack: i 10 i
+    VM_OPCODE_USUB,
+    // stack: (10-i) i
     VM_PEEK_BITMASK | VM_OPCODE_IO,
-    FN_MyPrint,
+    FN_MyPrint2,
+    // stack: i
+    VM_OPCODE_DROP,
 
     // Sub 1
     VM_OPCODE_LOAD_IMM,
