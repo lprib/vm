@@ -25,9 +25,11 @@ bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex, bool peek)
 
     // Fill args buffer in reverse since the oldest pushed value should be the
     // first arg
-    for (int i = registryItem->numArgs - 1; i >= 0; i--)
+    int maxArgIndex = registryItem->numArgs - 1;
+    for (int i = maxArgIndex; i >= 0; i--)
     {
-        argsBuffer[i] = peek ? vm_PeekStack(state, i) : vm_PopStack(state);
+        argsBuffer[i] =
+            peek ? vm_PeekStack(state, maxArgIndex - i) : vm_PopStack(state);
     }
 
     registryItem->callback(argsBuffer, &returnValue);
