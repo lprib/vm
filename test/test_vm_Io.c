@@ -65,31 +65,41 @@ static int ItemsOnStack(void) { return STACK_SIZE - stack_idx; }
 
 TEST_DEFINE_CASE(NoArgsNoReturnNoPeek)
     ResetStack();
+    noArgsNoReturnCalled = false;
+
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
     vm_IoFnCall(NULL, 0, false);
+
     ASSERT(noArgsNoReturnCalled);
     ASSERT(ItemsOnStack() == 0);
 }
 
 TEST_DEFINE_CASE(NoArgsNoReturnPeek)
     ResetStack();
+    noArgsNoReturnCalled = false;
+
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
     vm_IoFnCall(NULL, 0, true);
+
     ASSERT(noArgsNoReturnCalled);
     ASSERT(ItemsOnStack() == 0);
 }
 
 TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
     ResetStack();
+    twoArgsOneReturnCalled = false;
+
     // Push args to stack
     stack_idx = STACK_SIZE - 2;
     stack[STACK_SIZE - 1] = 12;
     stack[STACK_SIZE - 2] = 34;
+
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
     vm_IoFnCall(NULL, 1, false);
+
     ASSERT(twoArgsOneReturnCalled);
     // Return should be on the stack, along with args since they were peeked
     ASSERT(ItemsOnStack() == 1);
@@ -98,13 +108,17 @@ TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
 
 TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
     ResetStack();
+    twoArgsOneReturnCalled = false;
+
     // Push args to stack
     stack_idx = STACK_SIZE - 2;
     stack[STACK_SIZE - 1] = 12;
     stack[STACK_SIZE - 2] = 34;
+
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
     vm_IoFnCall(NULL, 1, true);
+
     ASSERT(twoArgsOneReturnCalled);
     // Return should be on the stack, along with args since they were peeked
     ASSERT(ItemsOnStack() == 3);
