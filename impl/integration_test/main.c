@@ -6,27 +6,37 @@
 
 #include <stdio.h>
 
-VM_DEFINE_IO_INTERFACE(Return1) { *outReturn = 100; }
+VM_DEFINE_IO_INTERFACE(Return1) {
+    UNUSED(state);
+    UNUSED(args);
+    *outReturn = 100;
+}
 
 VM_DEFINE_IO_INTERFACE(Arg1Return1)
 {
+    UNUSED(state);
     vm_uint arg = args[0];
     *outReturn = arg * 3;
 }
 
 VM_DEFINE_IO_INTERFACE(Arg3Return1)
 {
+    UNUSED(state);
     *outReturn = args[0] + args[1] + args[2];
 }
 
 VM_DEFINE_IO_INTERFACE(MyPrint)
 {
+    UNUSED(state);
+    UNUSED(outReturn);
     vm_uint arg = args[0];
     printf("%d\n", arg);
 }
 
 VM_DEFINE_IO_INTERFACE(MyPrint2)
 {
+    UNUSED(state);
+    UNUSED(outReturn);
     vm_uint arg0 = args[0];
     vm_uint arg1 = args[1];
     printf("%d %d\n", arg0, arg1);
