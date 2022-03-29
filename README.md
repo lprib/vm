@@ -35,13 +35,19 @@ Loop:
 
 Provide stack overflow and underflow hooks
 
+## Makefile
+- `make` runs all tests (supress build output)
+- `make test` run all tests
+- `make integration` build and run impl/integration_test
+- `make coverage` build and run tests, and open coverage report (clean before
+  this so that it can be recompiled with coverage flags)
+
 ## ISA implementation
 - `LOAD [n]`: push value at addr n to stack
 - `STORE [n]`: pop stack and save at addr n
 - `LOAD_IMM [n]`: push value n to stack
-- `PICK [n]`: pick the nth top most value from stack, and duplicate it on to the stack
-- `TAKE [n]`: take the nth top most value from stack, move it to the top of the
-  stack. All other values are shuffled accordingly.
+- `PICK [n]`: remove the nth value on the stack, shuffle items on top to fill
+  the gap, and push it to the top. Works with peek bitmask.
 - `DUP`: duplicate top item on stack
 - `SWAP`: swap top 2 items on stack
 - `DROP`: remove top element from stack
@@ -91,7 +97,7 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 - TODO: Abstract notion of "next opcode" which can be from an array or stream
 	- WONT DO: need to support jumps
 
-# To add an opcode
+## To add an opcode
 - Add to vm_Opcodes.h
 - Handle in vm_ProcessOpcode.c
 - Add unit test in test_vm_ProcessOpcode.c

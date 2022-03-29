@@ -28,7 +28,7 @@ CFLAGS = -Wall -Wextra -Werror
 
 COVERAGE_CFLAGS = --coverage
 
-.DEFAULT_GOAL := test
+.DEFAULT_GOAL := silent_test
 
 # quiet flag. conditionally set to "@" to supress output
 Q = 
@@ -69,13 +69,21 @@ RUN_TESTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=%)
 $(RUN_TESTS):%:$(TEST_EXE_DIR)/%
 	$(Q) ./$<
 
-# tests are silent
-test: Q=@
 test: $(RUN_TESTS)
 
+silent_test: Q=@
+silent_test: test
+
 # Coverage
-coverage_test: CFLAGS+=$(COVERAGE_FLAGS)
+
+coverage_test: CFLAGS=$(COVERAGE_CFLAGS)
 coverage_test: test
+
+$(OUT_DIR)/coverage.html: coverage_test
+	gcovr --html-details $@ -e "test/*"
+
+coverage: $(OUT_DIR)/coverage.html
+	xdg-open $<
 
 
 # Generate intgration test executable
@@ -83,25 +91,29 @@ coverage_test: test
 
 INTEGRATION_SRC_DIR = $(IMPL_DIR)/integration_test
 $(IMPL_EXE_DIR)/integration_test: $(INTEGRATION_SRC_DIR)/main.c $(SRC_OUT_FILES) | $(IMPL_EXE_DIR)
-	@$(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) $^ -o $@
+	$(Q) $(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) $^ -o $@
 
 integration: $(IMPL_EXE_DIR)/integration_test
-	@./$<
+	$(Q) ./$<
 
 clean:
-	@rm -r $(OUT_DIR)
+	$(Q) rm -rf $(OUT_DIR)
 
 debug: 
 	@echo TEST_SOURCES
 	@echo $(TEST_SOURCES)
 	@echo TEST_EXES
 	@echo $(TEST_EXES)
-	@echo TEST_INCLUDE_FLAGS
-	@echo $(TEST_INCLUDE_FLAGS)
 	@echo SRC_INCLUDE_FILES
 	@echo $(SRC_INCLUDE_FILES)
+	@echo TEST_INCLUDE_FLAGS
+	@echo $(TEST_INCLUDE_FLAGS)
 	@echo TEST_INCLUDE_FILES
 	@echo $(TEST_INCLUDE_FILES)
+	@echo SRC_FILES
+	@echo $(SRC_FILES)
+	@echo SRC_OUT_FILES
+	@echo $(SRC_OUT_FILES)
 	@echo RUN_TESTS
 	@echo $(RUN_TESTS)
 
