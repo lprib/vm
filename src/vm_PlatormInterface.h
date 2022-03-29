@@ -2,11 +2,13 @@
 #define VM_PLATFORM_INTERFACE_H
 
 #include "vm_BaseTypes.h"
+#include "vm_State.h"
 
-typedef void (*vm_ioFunction_t)(vm_uint * argsBuffer, vm_uint * returnPointer);
+typedef void (*vm_ioFunction_t)(
+    vm_state_t * state, vm_uint * argsBuffer, vm_uint * returnPointer);
 
 #define VM_DEFINE_IO_INTERFACE(name) \
-    void name(vm_uint * args, vm_uint * outReturn)
+    void name(vm_state_t * state, vm_uint * args, vm_uint * outReturn)
 
 #define VM_IO_FN_MAX_ARGS 8
 

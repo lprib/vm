@@ -21,4 +21,16 @@ typedef enum
 #define VM_TO_SIGNED(n) (*(vm_int *)&n)
 #define VM_TO_UNSIGNED(n) (*(vm_uint *)&n)
 
+// eg: type_t UNUSED_P(paramName)
+// shut up gcc about unused params
+#ifdef __GNUC__
+    #define UNUSED_P(x) UNUSED_##x __attribute__((__unused__))
+#else
+    #define UNUSED_P(x) UNUSED_##x
+#endif
+
+// eg: USE(paramName);
+// shut up gcc about unused variables
+#define UNUSED(x) (void)(x)
+
 #endif

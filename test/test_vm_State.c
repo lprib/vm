@@ -4,18 +4,24 @@
 
 #include <stdlib.h>
 
+#define STACK_SIZE 100
+#define MEM_SIZE 100
+
 static vm_state_t NewTestState(void)
 {
     vm_state_t state;
-    vm_uint const stack_size = 100;
-    vm_uint const mem_size = 100;
 
-    vm_uint * stack = malloc(stack_size * sizeof(vm_uint));
-    vm_uint * mem = malloc(stack_size * sizeof(vm_uint));
+    vm_uint * stack = malloc(STACK_SIZE * sizeof(vm_uint));
+    vm_uint * mem = malloc(STACK_SIZE * sizeof(vm_uint));
 
-    vm_InitState(&state, stack, stack_size, mem, mem_size);
+    vm_InitState(&state, stack, STACK_SIZE, mem, MEM_SIZE);
 
     return state;
+}
+
+static int ItemsOnStack(vm_state_t * state)
+{
+    return state->stack_size - (state->sp - state->stack);
 }
 
 TEST_DEFINE_CASE(Init)
@@ -57,9 +63,52 @@ TEST_DEFINE_CASE(GetMemAndIncrement)
     state.mem[1] = 66;
     state.mem[2] = 77;
 
-    ASSERT(vm_GetMemAndIncrememt(&state) == 55);
-    ASSERT(vm_GetMemAndIncrememt(&state) == 66);
-    ASSERT(vm_GetMemAndIncrememt(&state) == 77);
+    ASSERT(vm_GetMemAndIncrement(&state) == 55);
+    ASSERT(vm_GetMemAndIncrement(&state) == 66);
+    ASSERT(vm_GetMemAndIncrement(&state) == 77);
+}
+
+TEST_DEFINE_CASE(Peek)
+    vm_state_t state = NewTestState();
+    vm_PushStack(&state, 77);
+    vm_PushStack(&state, 66);
+    vm_PushStack(&state, 55);
+    ASSERT(vm_PeekStack(&state, 0) == 55);
+    ASSERT(vm_PeekStack(&state, 1) == 66);
+    ASSERT(vm_PeekStack(&state, 2) == 77);
+}
+
+TEST_DEFINE_CASE(Take)
+    vm_state_t state = NewTestState();
+    vm_PushStack(&state, 77);
+    vm_PushStack(&state, 66);
+    vm_PushStack(&state, 55);
+    ASSERT(vm_TakeStack(&state, 0) == 55);
+    ASSERT(vm_PopStack(&state) == 66);
+    ASSERT(vm_PopStack(&state) == 77);
+    ASSERT(ItemsOnStack(&state) == 0);
+
+    state = NewTestState();
+    vm_PushStack(&state, 77);
+    vm_PushStack(&state, 66);
+    vm_PushStack(&state, 55);
+    ASSERT(vm_TakeStack(&state, 1) == 66);
+    ASSERT(vm_PopStack(&state) == 55);
+    ASSERT(vm_PopStack(&state) == 77);
+    ASSERT(ItemsOnStack(&state) == 0);
+
+    state = NewTestState();
+    vm_PushStack(&state, 77);
+    vm_PushStack(&state, 66);
+    vm_PushStack(&state, 55);
+    vm_PushStack(&state, 44);
+    vm_PushStack(&state, 33);
+    ASSERT(vm_TakeStack(&state, 3) == 66);
+    ASSERT(vm_PopStack(&state) == 33);
+    ASSERT(vm_PopStack(&state) == 44);
+    ASSERT(vm_PopStack(&state) == 55);
+    ASSERT(vm_PopStack(&state) == 77);
+    ASSERT(ItemsOnStack(&state) == 0);
 }
 
 int main(void)
@@ -67,5 +116,7 @@ int main(void)
     test_Init();
     test_PushPop();
     test_GetMemAndIncrement();
+    test_Peek();
+    test_Take();
     return 0;
 }

@@ -47,25 +47,34 @@ static void ProcessNextShouldContinue()
 
 // MOCKS:
 // vm_State.h
-void vm_PushStack(vm_state_t * state, vm_uint val)
+void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uint val)
 {
     test_state.sp--;
     *test_state.sp = val;
 }
 
-vm_uint vm_PopStack(vm_state_t * state)
+vm_uint vm_PopStack(vm_state_t * UNUSED_P(state))
 {
     vm_uint ret = *test_state.sp;
     test_state.sp++;
     return ret;
 }
 
-vm_uint vm_PeekStack(vm_state_t * state, vm_uint index)
+vm_uint vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uint index)
 {
     return test_state.sp[index];
 }
 
-vm_uint vm_GetMemAndIncrememt(vm_state_t * state)
+bool vm_TakeStack_called = false;
+vm_uint vm_TakeStack_index = -1;
+vm_uint vm_TakeStack(vm_state_t * UNUSED_P(state), vm_uint index)
+{
+    vm_TakeStack_called = true;
+    vm_TakeStack_index = index;
+    return 99; // must agree with test case below
+}
+
+vm_uint vm_GetMemAndIncrement(vm_state_t * UNUSED_P(state))
 {
     vm_uint ret = *test_state.pc;
     test_state.pc++;
@@ -76,7 +85,7 @@ vm_uint vm_GetMemAndIncrememt(vm_state_t * state)
 static int lastIoFnIndex = -1;
 static bool functionIsValid;
 
-bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex)
+bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex)
 {
     lastIoFnIndex = fnIndex;
     return functionIsValid;
@@ -115,6 +124,40 @@ TEST_DEFINE_CASE(LoadImm)
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);
+    ASSERT(MemWordsConsumed() == 2);
+}
+
+TEST_DEFINE_CASE(PickWithoutPeek)
+    ResetState(VM_OPCODE_PICK, 56, 12, 34);
+    vm_TakeStack_called = false;
+    vm_TakeStack_index = -1;
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(vm_TakeStack_called);
+    ASSERT(vm_TakeStack_index == 56);
+    ASSERT(*test_state.sp == 99);
+    ASSERT(MemWordsConsumed() == 2);
+}
+
+TEST_DEFINE_CASE(PickWithPeek)
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_PICK, 0, 12, 34);
+    vm_TakeStack_called = false;
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(!vm_TakeStack_called);
+    ASSERT(test_state.sp[0] == 12);
+    ASSERT(test_state.sp[1] == 12);
+    ASSERT(test_state.sp[2] == 34);
+    ASSERT(MemWordsConsumed() == 2);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_PICK, 1, 12, 34);
+    vm_TakeStack_called = false;
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(!vm_TakeStack_called);
+    ASSERT(test_state.sp[0] == 34);
+    ASSERT(test_state.sp[1] == 12);
+    ASSERT(test_state.sp[2] == 34);
     ASSERT(MemWordsConsumed() == 2);
 }
 
@@ -264,6 +307,8 @@ int main(void)
     test_Load();
     test_Store();
     test_LoadImm();
+    test_PickWithPeek();
+    test_PickWithoutPeek();
     test_Dup();
     test_Swap();
     test_Drop();

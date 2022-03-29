@@ -6,6 +6,7 @@ AlignEscapedNewlines: DontAlign
 BinPackArguments: false
 BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
+IndentPPDirectives: BeforeHash
 
 BreakBeforeBraces: Allman
 

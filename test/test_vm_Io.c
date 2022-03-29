@@ -13,13 +13,13 @@ static vm_uint stack[STACK_SIZE];
 
 // MOCKS
 
-void vm_PushStack(vm_state_t * state, vm_uint val)
+void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uint val)
 {
     stack_idx--;
     stack[stack_idx] = val;
 }
 
-vm_uint vm_PopStack(vm_state_t * state)
+vm_uint vm_PopStack(vm_state_t * UNUSED_P(state))
 {
     vm_uint ret = stack[stack_idx];
     stack_idx++;
@@ -27,17 +27,23 @@ vm_uint vm_PopStack(vm_state_t * state)
     return ret;
 }
 
-vm_uint vm_PeekStack(vm_state_t * state, vm_uint index)
+vm_uint vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uint index)
 {
     return stack[stack_idx + index];
 }
 
 static bool noArgsNoReturnCalled = false;
-static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn) { noArgsNoReturnCalled = true; }
+
+static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn) {
+    UNUSED(state);
+    UNUSED(args);
+    UNUSED(outReturn);
+    noArgsNoReturnCalled = true; }
 
 static bool twoArgsOneReturnCalled = false;
 static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
 {
+    UNUSED(state);
     twoArgsOneReturnCalled = true;
     // This must agree with the test cases below
     ASSERT(args[0] == 12);

@@ -32,7 +32,7 @@ bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex, bool peek)
             peek ? vm_PeekStack(state, maxArgIndex - i) : vm_PopStack(state);
     }
 
-    registryItem->callback(argsBuffer, &returnValue);
+    registryItem->callback(state, argsBuffer, &returnValue);
 
     if (registryItem->hasReturn)
     {

@@ -39,7 +39,19 @@ vm_uint vm_PeekStack(vm_state_t * state, vm_uint index)
     return state->sp[index];
 }
 
-vm_uint vm_GetMemAndIncrememt(vm_state_t * state)
+/** take value at index in stack, and shuffle rest into the gap */
+vm_uint vm_TakeStack(vm_state_t * state, vm_uint index)
+{
+    vm_uint ret = state->sp[index];
+    for(int i = index; i > 0; i--)
+    {
+        state->sp[i] = state->sp[i - 1];
+    }
+    state->sp++;
+    return ret;
+}
+
+vm_uint vm_GetMemAndIncrement(vm_state_t * state)
 {
     vm_uint ret = *state->pc;
     state->pc++;
