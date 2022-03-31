@@ -67,6 +67,9 @@ Provide stack overflow and underflow hooks
 	- `OR`: bitwise or
 	- `XOR`: bitwise xor
 	- `MOD`: modulo
+	- `SHL`: left shift
+	- `LSHR`: logical right shift
+	- `ASHR`: arithmetic right shift
 - Unary ops take 1 item from stack and push result to stack:
 	- `INC`: increment
 	- `DEC`: decrement

@@ -115,7 +115,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     } \
     break;
 
-        VM_OPCODE_JUMPS
+        VM_JUMP_OPCODES
 #undef X
 
 #define X(name, op) \
@@ -123,10 +123,26 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     { \
         vm_uint r = POP_OR_PEEK(s, 0); \
         vm_uint l = POP_OR_PEEK(s, 1); \
-        vm_PushStack(s, VM_TO_UNSIGNED(op)); \
+        vm_uint res = op; \
+        vm_PushStack(s, res); \
     } \
     break;
-        VM_OPCODE_BINARY_OPS
+        VM_UNSIGNED_BINARY_OPCODES
+#undef X
+
+#define X(name, op) \
+    case VM_OPCODE_##name: \
+    { \
+        vm_uint r_unsigned = POP_OR_PEEK(s, 0); \
+        vm_uint l_unsigned = POP_OR_PEEK(s, 1); \
+        vm_int r = ((union { vm_int i; vm_uint u; }){.u = r_unsigned}).i; \
+        vm_int l = ((union { vm_int i; vm_uint u; }){.u = l_unsigned}).i; \
+        vm_int res_signed = op; \
+        vm_int res = ((union { vm_int i; vm_uint u; }){.i = res_signed}).u; \
+        vm_PushStack(s, res); \
+    } \
+    break;
+        VM_SIGNED_BINARY_OPCODES
 #undef X
 
 #define X(name, op) \

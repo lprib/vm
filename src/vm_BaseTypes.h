@@ -2,13 +2,16 @@
 #define VM_BASE_TYPES_H
 
 #include <stdbool.h>
-#include <stdint.h>
+#include <limits.h>
 
 #define VM_INT_BITWIDTH 16
 
-typedef int16_t vm_int;
-typedef uint16_t vm_uint;
-typedef bool vm_bool;
+typedef short vm_int;
+typedef unsigned short vm_uint;
+
+#define VM_INT_MAX SHRT_MAX
+#define VM_INT_MIN SHRT_MIN
+#define VM_UINT_MAX USHRT_MAX
 
 typedef enum
 {
@@ -16,10 +19,6 @@ typedef enum
     VM_PROCESS_PROGRAM_HALT,
     VM_PROCESS_ERROR_UNDEF_IO_FN
 } vm_programTickResult_t;
-
-// bitwise casts
-#define VM_TO_SIGNED(n) (*(vm_int *)&n)
-#define VM_TO_UNSIGNED(n) (*(vm_uint *)&n)
 
 // eg: type_t UNUSED_P(paramName)
 // shut up gcc about unused params

@@ -1,6 +1,7 @@
 #ifndef VM_PLATFORM_INTERFACE_H
 #define VM_PLATFORM_INTERFACE_H
 
+#include <stdbool.h>
 #include "vm_BaseTypes.h"
 #include "vm_State.h"
 
@@ -16,7 +17,7 @@ typedef struct
 {
     vm_ioFunction_t callback;
     vm_uint numArgs;
-    vm_bool hasReturn;
+    bool hasReturn;
 } vm_ioFunctionRegistryItem_t;
 
 void vmint_GetIoFunctionRegistry(

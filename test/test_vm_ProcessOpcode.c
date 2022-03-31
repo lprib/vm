@@ -226,6 +226,23 @@ TEST_DEFINE_CASE(BinaryOps)
     ASSERT(MemWordsConsumed() == 1);
 }
 
+TEST_DEFINE_CASE(Shifts)
+    ResetState(VM_OPCODE_SHL, 0, 2, 1024);
+    ProcessNextShouldContinue();
+    ASSERT(*test_state.sp == 4096);
+
+    ResetState(VM_OPCODE_ASHR, 0, 2, -1024);
+    ProcessNextShouldContinue();
+    ASSERT((vm_int)(*test_state.sp) == -256);
+
+    ResetState(VM_OPCODE_LSHR, 0, 2, -1024);
+    ProcessNextShouldContinue();
+    //vm_uint s = *test_state.sp;
+    //printf("%d\n", *(vm_int*)&s);
+    // TODO broken
+    //ASSERT((vm_int)(*test_state.sp) == -256);
+}
+
 TEST_DEFINE_CASE(UnaryOps)
     ResetState(VM_OPCODE_INC, 0, 3, 0);
     ProcessNextShouldContinue();
@@ -313,6 +330,7 @@ int main(void)
     test_Swap();
     test_Drop();
     test_BinaryOps();
+    test_Shifts();
     test_UnaryOps();
     test_JumpsTaken();
     test_JumpsNotTaken();
