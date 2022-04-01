@@ -29,9 +29,24 @@ ResetState(vm_uint mem0, vm_uint mem1, vm_uint stack0, vm_uint stack1)
     // Items go at the end since stack growns from top down
     stack[98] = stack0;
     stack[99] = stack1;
+    test_state.sp = stack + 98;
 
     test_state.pc = mem;
+}
+
+static void ResetStateWithExtendedMemory(
+    vm_uint * new_mem, int new_mem_size, vm_uint stack0, vm_uint stack1)
+{
+    memset(stack, 0, sizeof(stack));
+    memset(mem, 0, sizeof(mem));
+
+    // Items go at the end since stack growns from top down
+    stack[98] = stack0;
+    stack[99] = stack1;
     test_state.sp = stack + 98;
+
+    memcpy(mem, new_mem, new_mem_size);
+    test_state.pc = mem;
 }
 
 static int ItemsOnStack()
@@ -74,11 +89,21 @@ vm_uint vm_TakeStack(vm_state_t * UNUSED_P(state), vm_uint index)
     return 99; // must agree with test case below
 }
 
-vm_uint vm_GetMemAndIncrement(vm_state_t * UNUSED_P(state))
+vm_uint vm_GetProgramAndIncrement(vm_state_t * UNUSED_P(state))
 {
     vm_uint ret = *test_state.pc;
     test_state.pc++;
     return ret;
+}
+
+vm_uint vm_GetMem(vm_state_t * UNUSED_P(state), vm_uint addr)
+{
+    return mem[addr];
+}
+
+void vm_SetMem(vm_state_t * UNUSED_P(state), vm_uint addr, vm_uint val)
+{
+    mem[addr] = val;
 }
 
 // vm_Io.h
@@ -90,6 +115,8 @@ bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex)
     lastIoFnIndex = fnIndex;
     return functionIsValid;
 }
+
+// TEST CASES:
 
 TEST_DEFINE_CASE(Load)
     // Program: Load value at addr 51 to stack
@@ -125,6 +152,82 @@ TEST_DEFINE_CASE(LoadImm)
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);
     ASSERT(MemWordsConsumed() == 2);
+}
+
+TEST_DEFINE_CASE(Deref)
+    ResetState(VM_OPCODE_DEREF, 123, 1, 0);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 2);
+    ASSERT(*test_state.sp == 123);
+    ASSERT(MemWordsConsumed() == 1);
+}
+
+TEST_DEFINE_CASE(ArrayLoad)
+    // testing access of array at memory idx 4, struct offset 1, struct size 2,
+    // index 2
+    vm_uint testmem[] = {
+        VM_OPCODE_ARRAY_LOAD,
+        4,
+        VM_PACK_TO_INT(1, 2),
+        0,
+        55, // array start, idx 0
+        10,
+        55, // idx 1
+        11,
+        55, // idx 2
+        12, // idx 2, offset 1
+        55,
+        13};
+    ResetStateWithExtendedMemory(testmem, sizeof(testmem), 2, 0);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 2);
+    ASSERT(*test_state.sp == 12);
+    ASSERT(MemWordsConsumed() == 3);
+
+    // set peek
+    testmem[0] |= VM_PEEK_BITMASK;
+    ResetStateWithExtendedMemory(testmem, sizeof(testmem), 2, 0);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 3);
+    ASSERT(test_state.sp[0] == 12);
+    // Should leave index on stack
+    ASSERT(test_state.sp[1] == 2);
+    ASSERT(MemWordsConsumed() == 3);
+}
+
+TEST_DEFINE_CASE(ArrayStore)
+    const vm_uint base = 4;
+    const vm_uint offset = 2;
+    const vm_uint size = 3;
+    const vm_uint index = 1;
+
+    vm_uint testmem[] = {
+        VM_OPCODE_ARRAY_STORE,
+        base,
+        VM_PACK_TO_INT(offset, size),
+        0,
+        1, // array start, idx 0
+        1,
+        1,
+        1, // idx 1,
+        1,
+        1};
+    // value to store = 123, index = 1
+    ResetStateWithExtendedMemory(testmem, sizeof(testmem), index, 123);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 0);
+    ASSERT(mem[base + index * size + offset] == 123);
+    ASSERT(MemWordsConsumed() == 3);
+
+    // set peek
+    testmem[0] |= VM_PEEK_BITMASK;
+    ResetStateWithExtendedMemory(testmem, sizeof(testmem), index, 123);
+    ProcessNextShouldContinue();
+    ASSERT(ItemsOnStack() == 2);
+    ASSERT(mem[base + index * size + offset] == 123);
+    ASSERT(test_state.sp[0] == index);
+    ASSERT(test_state.sp[1] == 123);
+    ASSERT(MemWordsConsumed() == 3);
 }
 
 TEST_DEFINE_CASE(PickWithoutPeek)
@@ -237,10 +340,10 @@ TEST_DEFINE_CASE(Shifts)
 
     ResetState(VM_OPCODE_LSHR, 0, 2, -1024);
     ProcessNextShouldContinue();
-    //vm_uint s = *test_state.sp;
-    //printf("%d\n", *(vm_int*)&s);
-    // TODO broken
-    //ASSERT((vm_int)(*test_state.sp) == -256);
+// vm_uint s = *test_state.sp;
+// printf("%d\n", *(vm_int*)&s);
+//  TODO broken
+// ASSERT((vm_int)(*test_state.sp) == -256);
 }
 
 TEST_DEFINE_CASE(UnaryOps)
@@ -324,6 +427,9 @@ int main(void)
     test_Load();
     test_Store();
     test_LoadImm();
+    test_Deref();
+    test_ArrayLoad();
+    test_ArrayStore();
     test_PickWithPeek();
     test_PickWithoutPeek();
     test_Dup();

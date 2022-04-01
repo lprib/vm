@@ -63,9 +63,9 @@ TEST_DEFINE_CASE(GetMemAndIncrement)
     state.mem[1] = 66;
     state.mem[2] = 77;
 
-    ASSERT(vm_GetMemAndIncrement(&state) == 55);
-    ASSERT(vm_GetMemAndIncrement(&state) == 66);
-    ASSERT(vm_GetMemAndIncrement(&state) == 77);
+    ASSERT(vm_GetProgramAndIncrement(&state) == 55);
+    ASSERT(vm_GetProgramAndIncrement(&state) == 66);
+    ASSERT(vm_GetProgramAndIncrement(&state) == 77);
 }
 
 TEST_DEFINE_CASE(Peek)

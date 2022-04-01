@@ -33,6 +33,10 @@ vm_uint vm_PeekStack(vm_state_t * state, vm_uint index);
 
 vm_uint vm_TakeStack(vm_state_t * state, vm_uint index);
 
-vm_uint vm_GetMemAndIncrement(vm_state_t * state);
+vm_uint vm_GetProgramAndIncrement(vm_state_t * state);
+
+vm_uint vm_GetMem(vm_state_t* state, vm_uint addr);
+
+void vm_SetMem(vm_state_t* state, vm_uint addr, vm_uint val);
 
 #endif

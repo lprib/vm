@@ -41,13 +41,19 @@
 // clang-format off
 // disable format because X macros fuck with it
 
-// Note size of enum MUST fit in a vm_uint!
+// Note size of enum MUST fit into bitwidth of vm_uint - 1
+// to fit PEEK bit.
 typedef enum
 {
     // Memory
     VM_OPCODE_LOAD,
     VM_OPCODE_STORE,
     VM_OPCODE_LOAD_IMM,
+
+    // Pointers
+    VM_OPCODE_DEREF,
+    VM_OPCODE_ARRAY_LOAD,
+    VM_OPCODE_ARRAY_STORE,
 
     // Stack manipulation
     VM_OPCODE_PICK,

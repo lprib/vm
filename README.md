@@ -43,20 +43,38 @@ Provide stack overflow and underflow hooks
   this so that it can be recompiled with coverage flags)
 
 ## ISA implementation
-- `LOAD [n]`: push value at addr n to stack
-- `STORE [n]`: pop stack and save at addr n
-- `LOAD_IMM [n]`: push value n to stack
+`[...]` denotes a param that is baked in to program memory. `(...)` denotes a
+param that is taken from the stack. They are recorded in the order that they
+were pushed to stack, ie. `(a) (b)` means b is at the top of the stack.
+
+- `LOAD [addr]`: push value at `addr` in mem to stack
+- `STORE [addr] (n)`: store `n` to memory at `addr`
+- `LOAD_IMM [val]`: push value n to stack
+- `DEREF (addr)`: get memory at addr. Push result to stack.
+- `ARRAY_LOAD [base][offset&size] (index)`: Load a value from an array of
+  structs located in mem at `base`. Index is taken from stack. The high half of
+  `offset&size` (`offset`) determines the offset into the struct (0 if flat
+  array). Low half (`size`) sets the size of each member of the array. Setting
+  to zero will always grab first member of array regardless of index.
+	- `stack <- mem[base + index*size + offset]`
+	- Peek bitmask affects this normally, leaving index on the stack underneath
+	  the loaded value.
+- `ARRAY_STORE [base][offset&size] (value) (index)`: Store a value from the
+  stack to an array located in mem at `base`. Same addressing as previous
+  opcode.
+	- `mem[base + index*size + offset] <- value`
+	- Peek bitmask doesn't pop index or value as expected
 - `PICK [n]`: remove the nth value on the stack, shuffle items on top to fill
   the gap, and push it to the top. Works with peek bitmask.
-- `DUP`: duplicate top item on stack
-- `SWAP`: swap top 2 items on stack
-- `DROP`: remove top element from stack
-- `IO [n]`: Perform IO call to function at index n, see Platform IO Interface
+- `DUP (val)`: duplicate val and push to stack.
+- `SWAP (val1) (val2)`: swap `val1` and `val2` on stack.
+- `DROP (val)`: remove val from stack
+- `IO [n] (params...)`: Perform IO call to function at index n, see Platform IO Interface
 - `HALT`: Halts the VM. `vm_ProcessOpcode` will return
   `VM_PROCESS_PROGRAM_HALT` instead of a continue result.
 - `JUMP [n]`: unconditional branch to addr n
 - `JUMP(EQ|NEQ|LT|GT|LEQ|GEQ) [n]`: conditional branch to n based on top 2 items on stack
-- Binary ops take 2 items from stack and push result to stack:
+- Binary ops take 2 items from stack and push result to stack (`OPERATION (left) (right)`)
 	- `ADD`: addition
 	- `USUB`: unsigned subtract
 	- `SSUB`: signed subtract

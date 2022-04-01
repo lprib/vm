@@ -51,9 +51,20 @@ vm_uint vm_TakeStack(vm_state_t * state, vm_uint index)
     return ret;
 }
 
-vm_uint vm_GetMemAndIncrement(vm_state_t * state)
+vm_uint vm_GetProgramAndIncrement(vm_state_t * state)
 {
     vm_uint ret = *state->pc;
     state->pc++;
     return ret;
+}
+
+// TODO inline
+vm_uint vm_GetMem(vm_state_t* state, vm_uint addr)
+{
+    return state->mem[addr];
+}
+
+void vm_SetMem(vm_state_t* state, vm_uint addr, vm_uint val)
+{
+    state->mem[addr] = val;
 }
