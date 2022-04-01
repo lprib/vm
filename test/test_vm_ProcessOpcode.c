@@ -330,20 +330,33 @@ TEST_DEFINE_CASE(BinaryOps)
 }
 
 TEST_DEFINE_CASE(Shifts)
+    // Note this test is not vm_int bitwidth agnostic (TODO change that)
+
     ResetState(VM_OPCODE_SHL, 0, 2, 1024);
     ProcessNextShouldContinue();
     ASSERT(*test_state.sp == 4096);
 
+    // sign-extended, stays negative
     ResetState(VM_OPCODE_ASHR, 0, 2, -1024);
     ProcessNextShouldContinue();
     ASSERT((vm_int)(*test_state.sp) == -256);
 
+    // no sign-extend
     ResetState(VM_OPCODE_LSHR, 0, 2, -1024);
     ProcessNextShouldContinue();
-// vm_uint s = *test_state.sp;
-// printf("%d\n", *(vm_int*)&s);
-//  TODO broken
-// ASSERT((vm_int)(*test_state.sp) == -256);
+    // Does not keep sign bit
+    ASSERT((vm_int)(*test_state.sp) == (vm_int)16128);
+
+    // sign-extend
+    ResetState(VM_OPCODE_ASHR, 0, 2, 1 << (VM_INT_BITWIDTH - 1));
+    ProcessNextShouldContinue();
+    // Should arithmetically divide the negative by 4
+    ASSERT((vm_int)(*test_state.sp) == (vm_int)(VM_INT_MIN / 4));
+
+    // no sign extend, wraps to INT_MAX
+    ResetState(VM_OPCODE_LSHR, 0, 1, 1 << (VM_INT_BITWIDTH - 1));
+    ProcessNextShouldContinue();
+    ASSERT((vm_int)(*test_state.sp) == (1 << (VM_INT_BITWIDTH - 2)));
 }
 
 TEST_DEFINE_CASE(UnaryOps)

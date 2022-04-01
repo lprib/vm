@@ -4,14 +4,14 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#define VM_INT_BITWIDTH 16
-
 typedef short vm_int;
 typedef unsigned short vm_uint;
 
 #define VM_INT_MAX SHRT_MAX
 #define VM_INT_MIN SHRT_MIN
 #define VM_UINT_MAX USHRT_MAX
+
+#define VM_INT_BITWIDTH (sizeof(vm_int) * CHAR_BIT)
 
 // Amount of bits to shift to get the high half of a vm_uint
 #define VM_HIGH_PART_SHIFT 8
