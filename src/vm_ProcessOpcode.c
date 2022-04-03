@@ -38,7 +38,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
-    case VM_OP_LOAD_IMM:
+    case VM_OP_LOADIMM:
     {
         vm_PushStack(s, vm_GetProgramAndIncrement(s));
     }

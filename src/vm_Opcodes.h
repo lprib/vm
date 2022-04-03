@@ -10,7 +10,7 @@
 #define VM_SPECIAL_OPCODES \
     X(LOAD, 1, ) \
     X(STORE, 1, ) \
-    X(LOAD_IMM, 1, ) \
+    X(LOADIMM, 1, ) \
     X(DEREF, 0, ) \
     X(ARRAYLOAD, 2, ) \
     X(ARRAYSTORE, 2, ) \
@@ -24,42 +24,42 @@
 
 // X(name, numInlineArgs, comparisionOperation)
 #define VM_JUMP_OPCODES \
-    X(JUMPEQ, 2, ==) \
-    X(JUMPNEQ, 2, !=) \
-    X(JUMPLT, 2, <) \
-    X(JUMPGT, 2, >) \
-    X(JUMPLEQ, 2, <=) \
-    X(JUMPGEQ, 2, >=)
+    X(JUMPEQ, 1, ==) \
+    X(JUMPNEQ, 1, !=) \
+    X(JUMPLT, 1, <) \
+    X(JUMPGT, 1, >) \
+    X(JUMPLEQ, 1, <=) \
+    X(JUMPGEQ, 1, >=)
 
 // X(name, numInlineArgs, operation)
 // l and r are defined by client and have type vm_uint
 #define VM_UNSIGNED_BINARY_OPCODES \
-    X(ADD, 2, l + r) \
-    X(USUB, 2, l - r) \
-    X(UMUL, 2, l * r) \
-    X(DIV, 2, l / r) \
-    X(AND, 2, l & r) \
-    X(OR, 2, l | r) \
-    X(XOR, 2, l ^ r) \
-    X(MOD, 2, l % r) \
-    X(SHL, 2, l << r) \
-    X(LSHR, 2, l >> r)
+    X(ADD, 0, l + r) \
+    X(USUB, 0, l - r) \
+    X(UMUL, 0, l * r) \
+    X(DIV, 0, l / r) \
+    X(AND, 0, l & r) \
+    X(OR, 0, l | r) \
+    X(XOR, 0, l ^ r) \
+    X(MOD, 0, l % r) \
+    X(SHL, 0, l << r) \
+    X(LSHR, 0, l >> r)
 
 // X(name, numInlineArgs, operation)
 // l and r are defined by client and have type vm_int
 #define VM_SIGNED_BINARY_OPCODES \
-    X(SSUB, 2, l - r) \
-    X(SMUL, 2, l * r) \
+    X(SSUB, 0, l - r) \
+    X(SMUL, 0, l * r) \
     /* Even though the right parameter is technically unsigned, it is UB if */ \
     /* it overflows the bitwidth, so it's ok to cast to signed here */ \
-    X(ASHR, 2, l >> r)
+    X(ASHR, 0, l >> r)
 
 // X(name, numInlineArgs, operation)
 // n is defined by cliient and has type vm_uint
 #define VM_UNSIGNED_UNARY_OPCODES \
-    X(INC, 1, n + 1) \
-    X(DEC, 1, n - 1) \
-    X(INV, 1, ~n)
+    X(INC, 0, n + 1) \
+    X(DEC, 0, n - 1) \
+    X(INV, 0, ~n)
 
 // Each x-macros list here must comform to X(name, numInlineArgs, tokens).
 // tokens can be anything, and is used by vm_ProcessOpcodes.c to perform

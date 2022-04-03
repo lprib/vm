@@ -152,7 +152,7 @@ TEST_DEFINE_CASE(Store)
 }
 
 TEST_DEFINE_CASE(LoadImm)
-    ResetState(VM_OP_LOAD_IMM, 12, 0, 0);
+    ResetState(VM_OP_LOADIMM, 12, 0, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);

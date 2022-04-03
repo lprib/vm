@@ -35,6 +35,11 @@ Loop:
 
 Provide stack overflow and underflow hooks
 
+## TODOs
+- [ ] Make schema generation an executable which prints to stdout (less hacky)
+- [ ] Call and ret instructions
+- [ ] IO funciton schema from which to generate a ioFunctionName -> ioFunctionIndex map in assembler
+
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)
 - `test/` - Unit test sources. To be found by a makefile, must be named same as UUT module, with `test_` prefix. Makefile will automatically grab the correct UUT module for each test.

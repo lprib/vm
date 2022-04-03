@@ -72,22 +72,29 @@ void vmint_GetIoFunctionRegistry(
 #define MEM_SIZE 100
 #define STACK_SIZE 100
 
+/*
+    X(Return1, 0, true) \
+    X(Arg1Return1, 1, true) \
+    X(Arg3Return1, 3, true) \
+    X(MyPrint, 1, false) \
+    X(MyPrint2, 2, false)
+*/
 vm_uint mem[MEM_SIZE] = {
     VM_OP_IO,
     FN_Return1,
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     2,
     VM_OP_USUB,
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     100,
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     1000,
     VM_OP_IO,
     FN_Arg3Return1,
     VM_OP_IO,
     FN_MyPrint,
 
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     10,
     VM_OP_STORE,
     99,
@@ -97,7 +104,7 @@ vm_uint mem[MEM_SIZE] = {
 
     VM_OP_DUP,
     // stack: i i
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     10,
     // stack: 10 i i
     VM_OP_SWAP,
@@ -110,7 +117,7 @@ vm_uint mem[MEM_SIZE] = {
     VM_OP_DROP,
 
     // Sub 1
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     1,
     VM_OP_USUB,
 
@@ -118,7 +125,7 @@ vm_uint mem[MEM_SIZE] = {
     99,
 
     // Jump if != 0
-    VM_OP_LOAD_IMM,
+    VM_OP_LOADIMM,
     0,
     VM_OP_JUMPNEQ,
     17,
