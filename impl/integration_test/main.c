@@ -6,7 +6,8 @@
 
 #include <stdio.h>
 
-VM_DEFINE_IO_INTERFACE(Return1) {
+VM_DEFINE_IO_INTERFACE(Return1)
+{
     UNUSED(state);
     UNUSED(args);
     *outReturn = 100;
@@ -72,57 +73,57 @@ void vmint_GetIoFunctionRegistry(
 #define STACK_SIZE 100
 
 vm_uint mem[MEM_SIZE] = {
-    VM_OPCODE_IO,
+    VM_OP_IO,
     FN_Return1,
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     2,
-    VM_OPCODE_USUB,
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_USUB,
+    VM_OP_LOAD_IMM,
     100,
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     1000,
-    VM_OPCODE_IO,
+    VM_OP_IO,
     FN_Arg3Return1,
-    VM_OPCODE_IO,
+    VM_OP_IO,
     FN_MyPrint,
 
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     10,
-    VM_OPCODE_STORE,
+    VM_OP_STORE,
     99,
 
-    VM_OPCODE_LOAD, // Addr 17
+    VM_OP_LOAD, // Addr 17
     99,
 
-    VM_OPCODE_DUP,
+    VM_OP_DUP,
     // stack: i i
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     10,
     // stack: 10 i i
-    VM_OPCODE_SWAP,
+    VM_OP_SWAP,
     // stack: i 10 i
-    VM_OPCODE_USUB,
+    VM_OP_USUB,
     // stack: (10-i) i
-    VM_PEEK_BITMASK | VM_OPCODE_IO,
+    VM_PEEK_BITMASK | VM_OP_IO,
     FN_MyPrint2,
     // stack: i
-    VM_OPCODE_DROP,
+    VM_OP_DROP,
 
     // Sub 1
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     1,
-    VM_OPCODE_USUB,
+    VM_OP_USUB,
 
-    VM_PEEK_BITMASK | VM_OPCODE_STORE,
+    VM_PEEK_BITMASK | VM_OP_STORE,
     99,
 
     // Jump if != 0
-    VM_OPCODE_LOAD_IMM,
+    VM_OP_LOAD_IMM,
     0,
-    VM_OPCODE_JUMPNEQ,
+    VM_OP_JUMPNEQ,
     17,
 
-    VM_OPCODE_HALT,
+    VM_OP_HALT,
 };
 
 vm_uint stack[STACK_SIZE] = {0};

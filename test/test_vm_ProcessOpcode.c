@@ -126,7 +126,7 @@ bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex, bool peek)
 TEST_DEFINE_CASE(Load)
     // Program: Load value at addr 51 to stack
     // Stack: 2 zeros
-    ResetState(VM_OPCODE_LOAD, 50, 0, 0);
+    ResetState(VM_OP_LOAD, 50, 0, 0);
     mem[50] = 22;
     ProcessNextShouldContinue();
 
@@ -136,14 +136,14 @@ TEST_DEFINE_CASE(Load)
 }
 
 TEST_DEFINE_CASE(Store)
-    ResetState(VM_OPCODE_STORE, 50, 99, 1);
+    ResetState(VM_OP_STORE, 50, 99, 1);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     // popped 99, now 1 on stack
     ASSERT(*test_state.sp == 1);
     ASSERT(MemWordsConsumed() == 2);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_STORE, 50, 99, 1);
+    ResetState(VM_PEEK_BITMASK | VM_OP_STORE, 50, 99, 1);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     // popped 99, now 1 on stack
@@ -152,7 +152,7 @@ TEST_DEFINE_CASE(Store)
 }
 
 TEST_DEFINE_CASE(LoadImm)
-    ResetState(VM_OPCODE_LOAD_IMM, 12, 0, 0);
+    ResetState(VM_OP_LOAD_IMM, 12, 0, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 12);
@@ -160,7 +160,7 @@ TEST_DEFINE_CASE(LoadImm)
 }
 
 TEST_DEFINE_CASE(Deref)
-    ResetState(VM_OPCODE_DEREF, 123, 1, 0);
+    ResetState(VM_OP_DEREF, 123, 1, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(*test_state.sp == 123);
@@ -171,7 +171,7 @@ TEST_DEFINE_CASE(ArrayLoad)
     // testing access of array at memory idx 4, struct offset 1, struct size 2,
     // index 2
     vm_uint testmem[] = {
-        VM_OPCODE_ARRAYLOAD,
+        VM_OP_ARRAYLOAD,
         4,
         VM_PACK_TO_INT(1, 2),
         0,
@@ -207,7 +207,7 @@ TEST_DEFINE_CASE(ArrayStore)
     const vm_uint index = 1;
 
     vm_uint testmem[] = {
-        VM_OPCODE_ARRAYSTORE,
+        VM_OP_ARRAYSTORE,
         base,
         VM_PACK_TO_INT(offset, size),
         0,
@@ -236,7 +236,7 @@ TEST_DEFINE_CASE(ArrayStore)
 }
 
 TEST_DEFINE_CASE(PickWithoutPeek)
-    ResetState(VM_OPCODE_PICK, 56, 12, 34);
+    ResetState(VM_OP_PICK, 56, 12, 34);
     vm_TakeStack_called = false;
     vm_TakeStack_index = -1;
     ProcessNextShouldContinue();
@@ -248,7 +248,7 @@ TEST_DEFINE_CASE(PickWithoutPeek)
 }
 
 TEST_DEFINE_CASE(PickWithPeek)
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_PICK, 0, 12, 34);
+    ResetState(VM_PEEK_BITMASK | VM_OP_PICK, 0, 12, 34);
     vm_TakeStack_called = false;
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
@@ -258,7 +258,7 @@ TEST_DEFINE_CASE(PickWithPeek)
     ASSERT(test_state.sp[2] == 34);
     ASSERT(MemWordsConsumed() == 2);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_PICK, 1, 12, 34);
+    ResetState(VM_PEEK_BITMASK | VM_OP_PICK, 1, 12, 34);
     vm_TakeStack_called = false;
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
@@ -270,7 +270,7 @@ TEST_DEFINE_CASE(PickWithPeek)
 }
 
 TEST_DEFINE_CASE(Dup)
-    ResetState(VM_OPCODE_DUP, 0, 31, 0);
+    ResetState(VM_OP_DUP, 0, 31, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 31);
@@ -279,14 +279,14 @@ TEST_DEFINE_CASE(Dup)
 }
 
 TEST_DEFINE_CASE(Swap)
-    ResetState(VM_OPCODE_SWAP, 0, 12, 34);
+    ResetState(VM_OP_SWAP, 0, 12, 34);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(test_state.sp[0] == 34);
     ASSERT(test_state.sp[1] == 12);
     ASSERT(MemWordsConsumed() == 1);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_SWAP, 0, 12, 34);
+    ResetState(VM_PEEK_BITMASK | VM_OP_SWAP, 0, 12, 34);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 4);
     ASSERT(test_state.sp[0] == 34);
@@ -297,7 +297,7 @@ TEST_DEFINE_CASE(Swap)
 }
 
 TEST_DEFINE_CASE(Drop)
-    ResetState(VM_OPCODE_DROP, 0, 31, 5);
+    ResetState(VM_OP_DROP, 0, 31, 5);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     ASSERT(*test_state.sp == 5);
@@ -305,13 +305,13 @@ TEST_DEFINE_CASE(Drop)
 }
 
 TEST_DEFINE_CASE(BinaryOps)
-    ResetState(VM_OPCODE_ADD, 0, 3, 4);
+    ResetState(VM_OP_ADD, 0, 3, 4);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     ASSERT(*test_state.sp == 7);
     ASSERT(MemWordsConsumed() == 1);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_ADD, 0, 3, 4);
+    ResetState(VM_PEEK_BITMASK | VM_OP_ADD, 0, 3, 4);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(test_state.sp[0] == 7);
@@ -319,13 +319,13 @@ TEST_DEFINE_CASE(BinaryOps)
     ASSERT(test_state.sp[2] == 4);
     ASSERT(MemWordsConsumed() == 1);
 
-    ResetState(VM_OPCODE_USUB, 0, 2, 10);
+    ResetState(VM_OP_USUB, 0, 2, 10);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
     ASSERT(*test_state.sp == 8);
     ASSERT(MemWordsConsumed() == 1);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_USUB, 0, 2, 10);
+    ResetState(VM_PEEK_BITMASK | VM_OP_USUB, 0, 2, 10);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(test_state.sp[0] == 8);
@@ -337,41 +337,41 @@ TEST_DEFINE_CASE(BinaryOps)
 TEST_DEFINE_CASE(Shifts)
     // Note this test is not vm_int bitwidth agnostic (TODO change that)
 
-    ResetState(VM_OPCODE_SHL, 0, 2, 1024);
+    ResetState(VM_OP_SHL, 0, 2, 1024);
     ProcessNextShouldContinue();
     ASSERT(*test_state.sp == 4096);
 
     // sign-extended, stays negative
-    ResetState(VM_OPCODE_ASHR, 0, 2, -1024);
+    ResetState(VM_OP_ASHR, 0, 2, -1024);
     ProcessNextShouldContinue();
     ASSERT((vm_int)(*test_state.sp) == -256);
 
     // no sign-extend
-    ResetState(VM_OPCODE_LSHR, 0, 2, -1024);
+    ResetState(VM_OP_LSHR, 0, 2, -1024);
     ProcessNextShouldContinue();
     // Does not keep sign bit
     ASSERT((vm_int)(*test_state.sp) == (vm_int)16128);
 
     // sign-extend
-    ResetState(VM_OPCODE_ASHR, 0, 2, 1 << (VM_INT_BITWIDTH - 1));
+    ResetState(VM_OP_ASHR, 0, 2, 1 << (VM_INT_BITWIDTH - 1));
     ProcessNextShouldContinue();
     // Should arithmetically divide the negative by 4
     ASSERT((vm_int)(*test_state.sp) == (vm_int)(VM_INT_MIN / 4));
 
     // no sign extend, wraps to INT_MAX
-    ResetState(VM_OPCODE_LSHR, 0, 1, 1 << (VM_INT_BITWIDTH - 1));
+    ResetState(VM_OP_LSHR, 0, 1, 1 << (VM_INT_BITWIDTH - 1));
     ProcessNextShouldContinue();
     ASSERT((vm_int)(*test_state.sp) == (1 << (VM_INT_BITWIDTH - 2)));
 }
 
 TEST_DEFINE_CASE(UnaryOps)
-    ResetState(VM_OPCODE_INC, 0, 3, 0);
+    ResetState(VM_OP_INC, 0, 3, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(*test_state.sp == 4);
     ASSERT(MemWordsConsumed() == 1);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_INC, 0, 3, 0);
+    ResetState(VM_PEEK_BITMASK | VM_OP_INC, 0, 3, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
     ASSERT(*test_state.sp == 4);
@@ -379,23 +379,23 @@ TEST_DEFINE_CASE(UnaryOps)
 }
 
 TEST_DEFINE_CASE(JumpsTaken)
-    ResetState(VM_OPCODE_JUMP, 55, 0, 0);
+    ResetState(VM_OP_JUMP, 55, 0, 0);
     ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
-    ResetState(VM_OPCODE_JUMPEQ, 55, 5, 5);
+    ResetState(VM_OP_JUMPEQ, 55, 5, 5);
     ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
-    ResetState(VM_OPCODE_JUMPNEQ, 55, 4, 5);
+    ResetState(VM_OP_JUMPNEQ, 55, 4, 5);
     ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
-    ResetState(VM_OPCODE_JUMPLT, 55, 3, 2);
+    ResetState(VM_OP_JUMPLT, 55, 3, 2);
     ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_JUMPNEQ, 55, 4, 5);
+    ResetState(VM_PEEK_BITMASK | VM_OP_JUMPNEQ, 55, 4, 5);
     ProcessNextShouldContinue();
     ASSERT(test_state.sp[0] == 4);
     ASSERT(test_state.sp[1] == 5);
@@ -403,28 +403,28 @@ TEST_DEFINE_CASE(JumpsTaken)
 }
 
 TEST_DEFINE_CASE(JumpsNotTaken)
-    ResetState(VM_OPCODE_JUMPEQ, 55, 5, 4);
+    ResetState(VM_OP_JUMPEQ, 55, 5, 4);
     ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
 
-    ResetState(VM_OPCODE_JUMPNEQ, 55, 5, 5);
+    ResetState(VM_OP_JUMPNEQ, 55, 5, 5);
     ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
 
-    ResetState(VM_OPCODE_JUMPLT, 55, 2, 3);
+    ResetState(VM_OP_JUMPLT, 55, 2, 3);
     ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
 }
 
 TEST_DEFINE_CASE(Halt)
-    ResetState(VM_OPCODE_HALT, 0, 0, 0);
+    ResetState(VM_OP_HALT, 0, 0, 0);
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
     ASSERT(res == VM_PROCESS_PROGRAM_HALT);
     ASSERT(MemWordsConsumed() == 1);
 }
 
 TEST_DEFINE_CASE(IoCallValid)
-    ResetState(VM_OPCODE_IO, 10, 0, 0);
+    ResetState(VM_OP_IO, 10, 0, 0);
     functionIsValid = true;
     lastPeekFlag = false;
     ProcessNextShouldContinue();
@@ -432,7 +432,7 @@ TEST_DEFINE_CASE(IoCallValid)
     ASSERT(lastIoFnIndex == 10);
     ASSERT(MemWordsConsumed() == 2);
 
-    ResetState(VM_PEEK_BITMASK | VM_OPCODE_IO, 10, 0, 0);
+    ResetState(VM_PEEK_BITMASK | VM_OP_IO, 10, 0, 0);
     functionIsValid = true;
     lastPeekFlag = false;
     ProcessNextShouldContinue();
@@ -442,7 +442,7 @@ TEST_DEFINE_CASE(IoCallValid)
 }
 
 TEST_DEFINE_CASE(IoCallInvalid)
-    ResetState(VM_OPCODE_IO, 5, 0, 0);
+    ResetState(VM_OP_IO, 5, 0, 0);
     functionIsValid = false;
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
     ASSERT(lastIoFnIndex == 5);
