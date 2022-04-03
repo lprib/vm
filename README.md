@@ -35,12 +35,29 @@ Loop:
 
 Provide stack overflow and underflow hooks
 
+## Project structure
+- `src/` - Source headers and code (TODO separate public headers to `inc/`)
+- `test/` - Unit test sources. To be found by a makefile, must be named same as UUT module, with `test_` prefix. Makefile will automatically grab the correct UUT module for each test.
+- `schema/` - Contains the opcode schema generation header. This is not executable and cannot be compiled (only preprocessed).
+- `impl/` - Implementation directories.
+	- `integration_test/` - Source for integration test implementation.
+	- `linux/` - Linux bytecode interpreter implementation (TODO).
+- `out/` - Build output files
+	- `opcode_schema.csv` - Generated schema file.
+	- `*.o` - Intermediate compilation objects. These are shared between
+	  test, coverage, and integration compilations, so `make clean` between
+	  each compilation type.
+	- `impl_exe/` - Output executable for each implementation.
+	- `test_exe/` - Output executables for unit tests.
+
 ## Makefile
 - `make` runs all tests (supress build output)
 - `make test` run all tests
 - `make integration` build and run impl/integration_test
 - `make coverage` build and run tests, and open coverage report (clean before
   this so that it can be recompiled with coverage flags)
+- `make schema` generate `out/opcode_schema.csv` which contains names and
+  number of args for all recognized opcodes.
 
 ## ISA implementation
 `[...]` denotes a param that is baked in to program memory. `(...)` denotes a
@@ -120,6 +137,8 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 
 ## To add an opcode
 - Add to vm_Opcodes.h
+	- Do _not_ add directly to enum, only to relevant X-macros list
 - Handle in vm_ProcessOpcode.c
 - Add unit test in test_vm_ProcessOpcode.c
 - Document in README.md
+- Don't worry about assembler, should parse schema generated from vm_OpcodeSchema.h
