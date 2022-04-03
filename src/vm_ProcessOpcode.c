@@ -51,7 +51,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
-    case VM_OPCODE_ARRAY_LOAD:
+    case VM_OPCODE_ARRAYLOAD:
     {
         vm_uint base = vm_GetProgramAndIncrement(s);
         vm_uint offset_and_size = vm_GetProgramAndIncrement(s);
@@ -63,7 +63,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
-    case VM_OPCODE_ARRAY_STORE:
+    case VM_OPCODE_ARRAYSTORE:
     {
         vm_uint base = vm_GetProgramAndIncrement(s);
         vm_uint offset_and_size = vm_GetProgramAndIncrement(s);
@@ -79,15 +79,14 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OPCODE_PICK:
     {
+        vm_uint stackIndex = vm_GetProgramAndIncrement(s);
         if (peek)
         {
-            vm_uint peekIndex = vm_GetProgramAndIncrement(s);
-            vm_PushStack(s, vm_PeekStack(s, peekIndex));
+            vm_PushStack(s, vm_PeekStack(s, stackIndex));
         }
         else
         {
-            vm_uint removeIndex = vm_GetProgramAndIncrement(s);
-            vm_PushStack(s, vm_TakeStack(s, removeIndex));
+            vm_PushStack(s, vm_TakeStack(s, stackIndex));
         }
     }
     break;
@@ -197,7 +196,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
         vm_PushStack(s, op); \
     } \
     break;
-        VM_OPCODE_UNARY_OPS
+        VM_UNSIGNED_UNARY_OPCODES
 #undef X
 
     // Have to do this for exhaustive handling

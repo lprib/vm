@@ -2,6 +2,7 @@ SRC_DIR = src
 TEST_DIR = test
 OUT_DIR = out
 IMPL_DIR = impl
+SCHEMA_DIR = schema
 
 # TODO add separate INC folder for public headers
 
@@ -24,7 +25,7 @@ SRC_OUT_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=$(OUT_DIR)/%.o)
 
 CC = gcc
 # excessive pedanticism
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -flto -O3
 
 COVERAGE_CFLAGS = --coverage
 
@@ -84,6 +85,14 @@ $(OUT_DIR)/coverage.html: coverage_test
 
 coverage: $(OUT_DIR)/coverage.html
 	xdg-open $<
+
+
+# Generate opcode schema
+
+$(OUT_DIR)/opcode_schema.csv: $(SCHEMA_DIR)/vm_OpcodeSchema.h $(SRC_DIR)/vm_Opcodes.h | $(OUT_DIR)
+	gcc $(SRC_INCLUDE_FLAGS) -imacros vm_Opcodes.h -P -E $< | tr -d "[:space:]" | sed "s/;/\n/g" > $@
+
+schema: $(OUT_DIR)/opcode_schema.csv
 
 
 # Generate intgration test executable

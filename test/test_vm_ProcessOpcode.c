@@ -60,8 +60,7 @@ static void ProcessNextShouldContinue()
     ASSERT(vm_ProcessNextOpcode(&test_state) == VM_PROCESS_CONTINUE);
 }
 
-// MOCKS:
-// vm_State.h
+// mock vm_State.h
 void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uint val)
 {
     test_state.sp--;
@@ -106,13 +105,19 @@ void vm_SetMem(vm_state_t * UNUSED_P(state), vm_uint addr, vm_uint val)
     mem[addr] = val;
 }
 
-// vm_Io.h
+// mock vm_Io.h
+
+// Outputs from mock
 static int lastIoFnIndex = -1;
+static bool lastPeekFlag = false;
+
+// Input to mock
 static bool functionIsValid;
 
-bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex)
+bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex, bool peek)
 {
     lastIoFnIndex = fnIndex;
+    lastPeekFlag = peek;
     return functionIsValid;
 }
 
@@ -166,7 +171,7 @@ TEST_DEFINE_CASE(ArrayLoad)
     // testing access of array at memory idx 4, struct offset 1, struct size 2,
     // index 2
     vm_uint testmem[] = {
-        VM_OPCODE_ARRAY_LOAD,
+        VM_OPCODE_ARRAYLOAD,
         4,
         VM_PACK_TO_INT(1, 2),
         0,
@@ -202,7 +207,7 @@ TEST_DEFINE_CASE(ArrayStore)
     const vm_uint index = 1;
 
     vm_uint testmem[] = {
-        VM_OPCODE_ARRAY_STORE,
+        VM_OPCODE_ARRAYSTORE,
         base,
         VM_PACK_TO_INT(offset, size),
         0,
@@ -421,7 +426,17 @@ TEST_DEFINE_CASE(Halt)
 TEST_DEFINE_CASE(IoCallValid)
     ResetState(VM_OPCODE_IO, 10, 0, 0);
     functionIsValid = true;
+    lastPeekFlag = false;
     ProcessNextShouldContinue();
+    ASSERT(!lastPeekFlag);
+    ASSERT(lastIoFnIndex == 10);
+    ASSERT(MemWordsConsumed() == 2);
+
+    ResetState(VM_PEEK_BITMASK | VM_OPCODE_IO, 10, 0, 0);
+    functionIsValid = true;
+    lastPeekFlag = false;
+    ProcessNextShouldContinue();
+    ASSERT(lastPeekFlag);
     ASSERT(lastIoFnIndex == 10);
     ASSERT(MemWordsConsumed() == 2);
 }
