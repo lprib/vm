@@ -90,7 +90,7 @@ coverage: $(OUT_DIR)/coverage.html
 # Generate opcode schema
 
 $(OUT_DIR)/opcode_schema.csv: $(SCHEMA_DIR)/vm_OpcodeSchema.h $(SRC_DIR)/vm_Opcodes.h | $(OUT_DIR)
-	gcc $(SRC_INCLUDE_FLAGS) -imacros vm_Opcodes.h -P -E $< | tr -d "[:space:]" | sed "s/;/\n/g" > $@
+	gcc $(SRC_INCLUDE_FLAGS) -fsyntax-only -imacros vm_Opcodes.h -P -E $< | tr -d "[:space:]" | sed "s/;/\n/g" > $@
 
 schema: $(OUT_DIR)/opcode_schema.csv
 
@@ -126,4 +126,4 @@ debug:
 	@echo RUN_TESTS
 	@echo $(RUN_TESTS)
 
-.PHONY: test debug integration
+.PHONY: debug integration test silen_test coverage_test coverage schema clean
