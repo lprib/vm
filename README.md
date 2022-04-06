@@ -9,7 +9,8 @@
 6. Extendable
 
 ## Specifications per Reqs
-- (1): no reliance on platform in codebase. Ie no use of peripherals except for generic IO
+- (1): no reliance on platform in codebase. Ie no use of peripherals except for
+  generic IO
 - (5, 6): Unified IO for performing platform calls as well as IO.
 	- Same interface for function calls as IO?
 - (3): No looking up functions by name in bitcode (as in JVM)
@@ -38,12 +39,16 @@ Provide stack overflow and underflow hooks
 ## TODOs
 - [ ] Make schema generation an executable which prints to stdout (less hacky)
 - [ ] Call and ret instructions
-- [ ] IO funciton schema from which to generate a ioFunctionName -> ioFunctionIndex map in assembler
+- [ ] IO funciton schema from which to generate a ioFunctionName ->
+  ioFunctionIndex map in assembler
 
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)
-- `test/` - Unit test sources. To be found by a makefile, must be named same as UUT module, with `test_` prefix. Makefile will automatically grab the correct UUT module for each test.
-- `schema/` - Contains the opcode schema generation header. This is not executable and cannot be compiled (only preprocessed).
+- `test/` - Unit test sources. To be found by a makefile, must be named same as
+  UUT module, with `test_` prefix. Makefile will automatically grab the correct
+  UUT module for each test.
+- `schema/` - Contains the opcode schema generation header. This is not
+  executable and cannot be compiled (only preprocessed).
 - `impl/` - Implementation directories.
 	- `integration_test/` - Source for integration test implementation.
 	- `linux/` - Linux bytecode interpreter implementation (TODO).
@@ -63,6 +68,17 @@ Provide stack overflow and underflow hooks
   this so that it can be recompiled with coverage flags)
 - `make schema` generate `out/opcode_schema.csv` which contains names and
   number of args for all recognized opcodes.
+
+### Recursive makefiles
+- Each directory in `impl/` has it's own makefile, which is invoked by
+  the master with `make impl/directory`
+- Recursive makefile will get passed the following variables:
+	- `SUBMAKE_OUT`: output directory to put results. This is created by
+	  the master makefile before invoking the sub-makefile. It takes the
+	  value `./out/impl/directory`
+	- `VM_SRC_DIR`: source directory of VM, relative to the sub-makefile
+	- `VM_CFLAGS`: flags which are used in the main makefile to build unit
+	  tests (don't necessarily need to be used by sub-makefiles.
 
 ## ISA implementation
 `[...]` denotes a param that is baked in to program memory. `(...)` denotes a

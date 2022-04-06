@@ -6,16 +6,13 @@ SCHEMA_DIR = schema
 
 # TODO add separate INC folder for public headers
 
-TEST_EXE_DIR = $(OUT_DIR)/test_exe
-IMPL_EXE_DIR = $(OUT_DIR)/impl_exe
-
 # include path when building source
 SRC_INCLUDE_FLAGS = -I$(SRC_DIR)
 # include path when building tests (SRC_INCLUDE_FLAGS is also required)
 TEST_INCLUDE_FLAGS = -I$(TEST_DIR)
 
 TEST_SOURCES = $(wildcard $(TEST_DIR)/test_*.c)
-TEST_EXES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_EXE_DIR)/%)
+TEST_EXES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(OUT_DIR)/%)
 
 SRC_INCLUDE_FILES = $(wildcard $(SRC_DIR)/*.h)
 TEST_INCLUDE_FILES = $(wildcard $(TEST_DIR)/*.h)
@@ -37,13 +34,7 @@ Q =
 # Generate folders on demand
 
 $(OUT_DIR):
-	$(Q) mkdir -p $(OUT_DIR)
-
-$(TEST_EXE_DIR): | $(OUT_DIR)
-	$(Q) mkdir -p $(TEST_EXE_DIR)
-
-$(IMPL_EXE_DIR): | $(OUT_DIR)
-	$(Q) mkdir -p $(IMPL_EXE_DIR)
+	$(Q) mkdir -p $@
 
 # Generate out objects from main sources
 $(OUT_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_INCLUDE_FILES) | $(OUT_DIR)
@@ -58,7 +49,7 @@ $(OUT_DIR)/%.o: $(TEST_DIR)/%.c $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES)| $(OU
 
 # Test exes depend on two sources: test source and UUT module source.
 # Everything else should be mocked.
-$(TEST_EXE_DIR)/test_%: $(OUT_DIR)/test_%.o $(OUT_DIR)/%.o $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES) | $(TEST_EXE_DIR)
+$(OUT_DIR)/test_%: $(OUT_DIR)/test_%.o $(OUT_DIR)/%.o $(SRC_INCLUDE_FILES) $(TEST_INCLUDE_FILES) | $(OUT_DIR)
 	$(Q) $(CC) $(CFLAGS) $< $(word 2,$^) -o $@
 
 # Generate a phony rule for running each test suite
@@ -67,7 +58,7 @@ RUN_TESTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=%)
 
 # This rule substitues the executable basename (no path) with the path to
 # executable to actually execute
-$(RUN_TESTS):%:$(TEST_EXE_DIR)/%
+$(RUN_TESTS): %: $(OUT_DIR)/%
 	$(Q) ./$<
 
 test: $(RUN_TESTS)
@@ -94,16 +85,19 @@ $(OUT_DIR)/opcode_schema.csv: $(SCHEMA_DIR)/vm_OpcodeSchema.h $(SRC_DIR)/vm_Opco
 
 schema: $(OUT_DIR)/opcode_schema.csv
 
+# Recursive make for sub directories
+IMPL_DIRS = $(wildcard $(IMPL_DIR)/*)
+IMPL_OUT_DIRS = $(IMPL_DIRS:%=$(OUT_DIR)/%)
 
-# Generate intgration test executable
-# Assumed to be a single main.c file
+.PHONY: $(IMPL_DIRS)
 
-INTEGRATION_SRC_DIR = $(IMPL_DIR)/integration_test
-$(IMPL_EXE_DIR)/integration_test: $(INTEGRATION_SRC_DIR)/main.c $(SRC_OUT_FILES) | $(IMPL_EXE_DIR)
-	$(Q) $(CC) $(CFLAGS) $(SRC_INCLUDE_FLAGS) $^ -o $@
+# Pre-generate output dirs for submake
+$(IMPL_OUT_DIRS): %: | $(OUT_DIR)
+	$(Q) mkdir -p $@
 
-integration: $(IMPL_EXE_DIR)/integration_test
-	$(Q) ./$<
+# Invoke recursive makefile
+$(IMPL_DIRS): %: | $(OUT_DIR)/%
+	$(MAKE) -C $@ SUBMAKE_OUT=../../$(OUT_DIR)/$@ VM_SRC_DIR=../../$(SRC_DIR) VM_CFLAGS="$(CFLAGS)"
 
 clean:
 	$(Q) rm -rf $(OUT_DIR)
@@ -125,5 +119,10 @@ debug:
 	@echo $(SRC_OUT_FILES)
 	@echo RUN_TESTS
 	@echo $(RUN_TESTS)
+	@echo IMPL_DIRS
+	@echo $(IMPL_DIRS)
+	@echo IMPL_OUT_DIRS
+	@echo $(IMPL_OUT_DIRS)
 
-.PHONY: debug integration test silen_test coverage_test coverage schema clean
+.PHONY: debug integration test silen_test coverage_test coverage schema clean check
+
