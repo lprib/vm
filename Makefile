@@ -26,7 +26,7 @@ CFLAGS = -Wall -Wextra -Werror -flto -O3
 
 COVERAGE_CFLAGS = --coverage
 
-.DEFAULT_GOAL := silent_test
+all: silent_test schema
 
 # quiet flag. conditionally set to "@" to supress output
 Q = 
@@ -78,12 +78,7 @@ coverage: $(OUT_DIR)/coverage.html
 	xdg-open $<
 
 
-# Generate opcode schema
 
-$(OUT_DIR)/opcode_schema.csv: $(SCHEMA_DIR)/vm_OpcodeSchema.h $(SRC_DIR)/vm_Opcodes.h | $(OUT_DIR)
-	gcc $(SRC_INCLUDE_FLAGS) -fsyntax-only -imacros vm_Opcodes.h -P -E $< | tr -d "[:space:]" | sed "s/;/\n/g" > $@
-
-schema: $(OUT_DIR)/opcode_schema.csv
 
 # Recursive make for sub directories
 IMPL_DIRS = $(wildcard $(IMPL_DIR)/*)
@@ -97,7 +92,16 @@ $(IMPL_OUT_DIRS): %: | $(OUT_DIR)
 
 # Invoke recursive makefile
 $(IMPL_DIRS): %: | $(OUT_DIR)/%
-	$(MAKE) -C $@ SUBMAKE_OUT=../../$(OUT_DIR)/$@ VM_SRC_DIR=../../$(SRC_DIR) VM_CFLAGS="$(CFLAGS)"
+	$(Q) $(MAKE) -C $@ SUBMAKE_OUT=../../$(OUT_DIR)/$@ VM_SRC_DIR=../../$(SRC_DIR) VM_CFLAGS="$(CFLAGS)" Q=$(Q)
+
+
+
+
+# Generate opcode schema by invoking recusrivemake
+schema: Q=@
+schema: impl/schema
+	@echo "Generating opcode schema"
+	$(Q) ./$(OUT_DIR)/$</generate_schema > $(OUT_DIR)/opcode_schema.csv
 
 clean:
 	$(Q) rm -rf $(OUT_DIR)

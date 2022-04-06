@@ -37,7 +37,7 @@ Loop:
 Provide stack overflow and underflow hooks
 
 ## TODOs
-- [ ] Make schema generation an executable which prints to stdout (less hacky)
+- [x] Make schema generation an executable which prints to stdout (less hacky)
 - [ ] Call and ret instructions
 - [ ] IO funciton schema from which to generate a ioFunctionName ->
   ioFunctionIndex map in assembler
@@ -79,6 +79,7 @@ Provide stack overflow and underflow hooks
 	- `VM_SRC_DIR`: source directory of VM, relative to the sub-makefile
 	- `VM_CFLAGS`: flags which are used in the main makefile to build unit
 	  tests (don't necessarily need to be used by sub-makefiles.
+	- `Q`: set to value "`@`" if quite output is desired, otherwise set to nothing
 
 ## ISA implementation
 `[...]` denotes a param that is baked in to program memory. `(...)` denotes a
