@@ -1,4 +1,7 @@
+#include "li_Interpret.h"
+
 #include <argp.h>
+#include <stdlib.h>
 
 const char * cmd_version = "VM linux interpreter 1.0";
 const char * cmd_address = "<jackpribis@gmail.com>";
@@ -56,5 +59,21 @@ int main(int argc, char ** argv)
     arguments_t args;
     args.input_file = NULL;
     argp_parse(&cmd_argp, argc, argv, 0, 0, &args);
-    printf("chosen input file %s\n", args.input_file);
+    li_InitInterpreter(100, 100);
+    li_loadProgramResult_t res = li_LoadProgram(args.input_file);
+    switch (res)
+    {
+    case LOAD_FAILURE_COULD_NOT_OPEN_FILE:
+        fprintf(stderr, "Could not open input file\n");
+        exit(1);
+        break;
+    case LOAD_FAILURE_NOT_ENOUGH_MEM:
+        fprintf(stderr, "Not enough allocated to load program\n");
+        exit(1);
+        break;
+    case LOAD_SUCCESS:
+        break;
+    }
+
+    li_RunProgram();
 }

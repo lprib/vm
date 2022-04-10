@@ -41,6 +41,13 @@ Provide stack overflow and underflow hooks
 - [ ] Call and ret instructions
 - [ ] IO funciton schema from which to generate a ioFunctionName ->
   ioFunctionIndex map in assembler
+- [ ] Make vmint_GetIoFunctionRegistry a downward call instead of a link-time
+  callback. Should be associated with a certain state.
+- [ ] Add const everywhere
+- [ ] Add restrict in vm_InitState
+- [ ] ambigous whether mem_size is in bytes, words, or vm_uint (should be vm_uint). Document.
+- [ ] Finish impl/linux
+- [ ] Sort out endianness things (#define specifiation)
 
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)

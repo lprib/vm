@@ -43,6 +43,7 @@ VM_DEFINE_IO_INTERFACE(MyPrint2)
     printf("%d %d\n", arg0, arg1);
 }
 
+// X(name, numArgs, hasReturn)
 #define MY_IO_FNS \
     X(Return1, 0, true) \
     X(Arg1Return1, 1, true) \

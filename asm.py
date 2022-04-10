@@ -7,7 +7,7 @@ from enum import Enum, auto
 # Always assume 16 bit width in assembler
 PEEK_BITMASK = 1 << 15
 
-def parse_schema(filename):
+def parse_opcode_schema(filename):
     """ Generates map: name -> (opcode_value, num_args) """
     print(f"Reading schema from {filename}");
     opcodeSchema = {}
@@ -16,10 +16,21 @@ def parse_schema(filename):
             for i, line in enumerate(f.readlines()):
                 split = line.split(",")
                 opcodeSchema[split[0].lower()] = (i, int(split[1]))
+        return opcodeSchema
     except:
         print(f"{filename} could not be opened")
         sys.exit(0)
-    return opcodeSchema
+
+def parse_io_schema(filename):
+    """ Generates list of function names from io fn schema """
+    print(f"Reading io fn schema from {filename}")
+    try:
+        with open(filename) as f:
+            return [line.strip() for line in f.readlines()]
+    except:
+        print(f"{filename} could not be opened")
+        sys.exit(0)
+
 
 def parse_int(lineno, arg):
     try:
@@ -29,6 +40,10 @@ def parse_int(lineno, arg):
         sys.exit(1)
 
 def get_arg_value(lineno, arg_str):
+    """
+    Read an argument (label or int). If int, return int. If label, return
+    (name, current_lineno)
+    """
     try:
         return int(arg_str)
     except:
@@ -38,7 +53,7 @@ def do_pp_directive(lineno, directive, args, program):
     if directive == "#zeros":
         size = parse_int(lineno, args[0])
         program.extend([0] * size)
-    elif directive == "#data":
+    elif directive == "#data_words":
         program.extend(get_arg_value(lineno, arg) for arg in args)
     else:
         print(f"{lineno}: unknown PP directive {directive}")
@@ -105,11 +120,16 @@ def second_pass(outfile, program, label_table):
 def main():
     parser = argparse.ArgumentParser(description="VM bytecode assembler")
     parser.add_argument("-s", "--schema", metavar="FILE", dest="schema", default="./out/opcode_schema.csv", help="opcode schema csv file")
+    parser.add_argument("-f", "--io-fn-schema", metavar="FILE", dest="io_schema", help="Schema file for associating IO function names to indices.")
     parser.add_argument("-o", "--output", metavar="FILE", dest="output", required=True, help="output file")
     parser.add_argument('input_file', metavar="FILE", help="input file")
 
     args = parser.parse_args()
-    schema = parse_schema(args.schema)
+    schema = parse_opcode_schema(args.schema)
+
+    if args.io_schema is not None:
+        io_schema = parse_io_schema(args.io_schema)
+
     print(schema)
     program, label_table = first_pass(args.input_file, schema)
     print(label_table)
