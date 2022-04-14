@@ -199,9 +199,11 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
         VM_UNSIGNED_UNARY_OPCODES
 #undef X
 
-    // Have to do this for exhaustive handling
-    case VM_NUM_OPCODES:
-        break;
+    default:
+    {
+        result = VM_PROCESS_ERROR_INVALID_OPCODE;
+    }
+    break;
     }
 
     return result;

@@ -64,10 +64,14 @@ li_loadProgramResult_t li_LoadProgram(char const * filename)
     return LOAD_SUCCESS;
 }
 
-void li_RunProgram(void)
+vm_programTickResult_t li_RunProgram(void)
 {
-    while (vm_ProcessNextOpcode(&state) == VM_PROCESS_CONTINUE)
-        ;
+    vm_programTickResult_t res;
+    do
+    {
+        res = vm_ProcessNextOpcode(&state);
+    } while (res == VM_PROCESS_CONTINUE);
+    return res;
 }
 
 void li_DestroyInterpreter(void)

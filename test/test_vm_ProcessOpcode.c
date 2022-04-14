@@ -450,6 +450,12 @@ TEST_DEFINE_CASE(IoCallInvalid)
     ASSERT(MemWordsConsumed() == 2);
 }
 
+TEST_DEFINE_CASE(InvalidOpcode)
+    ResetState(65535, 0, 0, 0);
+    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    ASSERT(res == VM_PROCESS_ERROR_INVALID_OPCODE);
+}
+
 int main(void)
 {
     test_Load();
@@ -471,5 +477,6 @@ int main(void)
     test_Halt();
     test_IoCallValid();
     test_IoCallInvalid();
+    test_InvalidOpcode();
     return 0;
 }

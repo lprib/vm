@@ -96,6 +96,12 @@ $(IMPL_DIRS): %: | $(OUT_DIR)/%
 
 
 
+# Test targets for quick compiling impl/linux, assembling test.asm and running test.o
+interp: schema impl/linux
+	./asm.py test.asm -elittle -o ./out/asm_test.o
+	./out/impl/linux/main out/asm_test.o
+
+.PHONY: interp
 
 # Generate opcode schema by invoking recusrivemake
 schema: Q=@

@@ -1,6 +1,8 @@
 #ifndef LI_INTERPRET_H
 #define LI_INTERPRET_H
 
+#include "vm_ProcessOpcode.h"
+
 typedef enum
 {
     LOAD_SUCCESS,
@@ -10,7 +12,7 @@ typedef enum
 
 void li_InitInterpreter(int const mem_size, int const stack_size);
 li_loadProgramResult_t li_LoadProgram(char const * filename);
-void li_RunProgram(void);
+vm_programTickResult_t li_RunProgram(void);
 void li_DestroyInterpreter(void);
 
 #endif

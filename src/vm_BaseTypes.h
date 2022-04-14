@@ -21,13 +21,6 @@ typedef unsigned short vm_uint;
 // Pack low and high parts to single int
 #define VM_PACK_TO_INT(high, low) ((high << VM_HIGH_PART_SHIFT) | low)
 
-typedef enum
-{
-    VM_PROCESS_CONTINUE,
-    VM_PROCESS_PROGRAM_HALT,
-    VM_PROCESS_ERROR_UNDEF_IO_FN
-} vm_programTickResult_t;
-
 // eg: type_t UNUSED_P(paramName)
 // shut up gcc about unused params
 #ifdef __GNUC__

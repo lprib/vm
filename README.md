@@ -47,7 +47,10 @@ Provide stack overflow and underflow hooks
 - [ ] Add restrict in vm_InitState
 - [ ] ambigous whether mem_size is in bytes, words, or vm_uint (should be vm_uint). Document.
 - [ ] Finish impl/linux
-- [ ] Sort out endianness things (#define specifiation)
+- [x] Sort out endianness things (#define specifiation)
+- [ ] processnextopcode should return a tagged enum with failure enum and offending info (bad opcode, bad io fn...)
+- [ ] make asm.py generate source mappings from byte index to source line#
+- [ ] With more detailed error return from processnextopcode, integrate into source mappings from asm.py
 
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)
@@ -92,6 +95,8 @@ Provide stack overflow and underflow hooks
 `[...]` denotes a param that is baked in to program memory. `(...)` denotes a
 param that is taken from the stack. They are recorded in the order that they
 were pushed to stack, ie. `(a) (b)` means b is at the top of the stack.
+
+All words are 16 bit (opcode and args). Endianness is decided by implementation.
 
 - `LOAD [addr]`: push value at `addr` in mem to stack
 - `STORE [addr] (n)`: store `n` to memory at `addr`
@@ -171,3 +176,24 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 - Add unit test in test_vm_ProcessOpcode.c
 - Document in README.md
 - Don't worry about assembler, should parse schema generated from vm_OpcodeSchema.h
+
+## Assembler syntax
+```
+// comment
+
+// insert a list of data words
+#words 12 34 56
+// insert 10 zero-words
+#zeros 10
+
+:label
+jump label
+// all args can take an int or a label name
+
+// normal add
+add
+
+// add with peek bit
+@add
+```
+Also see `./asm.py --help`

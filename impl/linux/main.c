@@ -1,6 +1,8 @@
 #include "li_Interpret.h"
+#include "vm_ProcessOpcode.h"
 
 #include <argp.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 const char * cmd_version = "VM linux interpreter 1.0";
@@ -30,7 +32,7 @@ static error_t parse_opt(int key, char * arg, struct argp_state * state)
         arguments->input_file = arg;
         break;
     case ARGP_KEY_END:
-        if (state->arg_num <= 1)
+        if (state->arg_num > 1)
         {
             fprintf(stderr, "[FILENAME] required\n\n");
             argp_usage(state);
@@ -75,5 +77,19 @@ int main(int argc, char ** argv)
         break;
     }
 
-    li_RunProgram();
+    vm_programTickResult_t run_result = li_RunProgram();
+    switch (run_result)
+    {
+    case VM_PROCESS_CONTINUE:
+        break;
+    case VM_PROCESS_PROGRAM_HALT:
+        printf("Finished successfully.\n");
+        break;
+    case VM_PROCESS_ERROR_UNDEF_IO_FN:
+        printf("Undefined IO function call\n");
+        break;
+    case VM_PROCESS_ERROR_INVALID_OPCODE:
+        printf("Invalid opcode\n");
+    }
+    li_DestroyInterpreter();
 }
