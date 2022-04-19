@@ -42,15 +42,25 @@ Provide stack overflow and underflow hooks
 - [ ] IO funciton schema from which to generate a ioFunctionName ->
   ioFunctionIndex map in assembler
 - [ ] Make vmint_GetIoFunctionRegistry a downward call instead of a link-time
-  callback. Should be associated with a certain state.
+  callback. Should be associated with a certain vm_state_t struct, so there
+  could be multiple states with different IO registries (usecase?).
 - [ ] Add const everywhere
 - [ ] Add restrict in vm_InitState
-- [ ] ambigous whether mem_size is in bytes, words, or vm_uint (should be vm_uint). Document.
+- [ ] ambigous whether mem_size is in bytes, words, or vm_uint (should be
+  vm_uint). Document.
 - [ ] Finish impl/linux
 - [x] Sort out endianness things (#define specifiation)
-- [ ] processnextopcode should return a tagged enum with failure enum and offending info (bad opcode, bad io fn...)
+- [ ] processnextopcode should return a tagged enum with failure enum and
+  offending info (bad opcode, bad io fn...)
 - [ ] make asm.py generate source mappings from byte index to source line#
-- [ ] With more detailed error return from processnextopcode, integrate into source mappings from asm.py
+- [ ] With more detailed error return from processnextopcode, integrate into
+  source mappings from asm.py
+- [ ] Remove the packed offset&size field for ARRAY_LOAD and ARRAY_STORE. Can
+  make a compressed ISA later...
+- [ ] ARRAYLOAD/ARRAYSTORE should be LOADARRAY/STOREARRAY for symmetry
+- [ ] paranoid mode which checks all mem derefs for out of bounds and stack over/underflow
+- [ ] Don't need vm_GetMem as the internals are already used in ProcessOpcode for jumps
+- [ ] strings
 
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)
@@ -125,6 +135,9 @@ All words are 16 bit (opcode and args). Endianness is decided by implementation.
   `VM_PROCESS_PROGRAM_HALT` instead of a continue result.
 - `JUMP [n]`: unconditional branch to addr n
 - `JUMP(EQ|NEQ|LT|GT|LEQ|GEQ) [n]`: conditional branch to n based on top 2 items on stack
+- `CALL [label]` - push PC+1 to the stack and jump to label
+- `RET [n]` - return to the caller with `n` return words
+	- Picks the return PC `n` items down the stack. Removes it, and jumps to that value.
 - Binary ops take 2 items from stack and push result to stack (`OPERATION (left) (right)`)
 	- `ADD`: addition
 	- `USUB`: unsigned subtract
@@ -150,6 +163,8 @@ more of an extended register set. This also applies to IO function calls, which
 will peek all of their arguments if the bit is set.
 
 ## Platform IO Interface
+**TODO update this**
+
 IO functions are implmented by the client of this API, and can include
 arguments and a return, all `vm_uints`. Argments are popped (or peeked if peek
 bit set) from the stack. Optional return is pushed to the stack.
@@ -158,7 +173,7 @@ If the function number requested by the bytecode is not an implemented function
 by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 
 - Include `vm_PlatformInterface.h`.
-- Provide your own `vmint_IoFunctionRegistry.h"
+- Provide your own `vmint_IoFunctionRegistry.h"`
 	- define `VM_IO_FN_REGISTRY` with X macros
 	- `X(name, numArgs, hasReturn)`
 	- `X(io_MyFunction, 2, false)`
@@ -178,6 +193,7 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 - Don't worry about assembler, should parse schema generated from vm_OpcodeSchema.h
 
 ## Assembler syntax
+
 ```
 // comment
 
@@ -185,6 +201,10 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 #words 12 34 56
 // insert 10 zero-words
 #zeros 10
+// insert (escaped) string
+#string my\nstring
+#words 0
+// need to manually end string with #words 0
 
 :label
 jump label
@@ -196,4 +216,44 @@ add
 // add with peek bit
 @add
 ```
+
 Also see `./asm.py --help`
+
+## Function call investigation
+```
+loadimm 100
+call fn_add1
+
+io 0
+
+halt
+
+fn_add1:
+loadimm 1
+add
+ret
+
+```
+
+- `call`: push current PC+1
+- `ret`: pop and jump to addr
+
+Questions:
+How to manage 1 return, no return, multiple returns. How do we know which stack element holds the return address?
+
+`ret [n]` where n is the # of return items? (microcode: `pick [n] -> return to that addr`.
+
+### When calling
+return addr on top of stack: ` -> ret arg1 arg2`
+
+return addr behind args: `-> arg1 arg2 ret`
+
+Base pointer:
+
+```
+>top of stack<
+
+
+
+```
+

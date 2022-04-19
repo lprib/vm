@@ -50,12 +50,17 @@ def get_arg_value(lineno, arg_str):
     except:
         return arg_str, lineno
 
-def do_pp_directive(lineno, directive, args, program):
+def do_pp_directive(lineno, directive, args, program, full_line):
     if directive == "#zeros":
         size = parse_int(lineno, args[0])
         program.extend([0] * size)
     elif directive == "#words":
         program.extend(get_arg_value(lineno, arg) for arg in args)
+    elif directive == "#string":
+        assert full_line.startswith("#string "), "bad string directive"
+        string = full_line.lstrip("#string ")
+        chars = bytes(string, "utf-8").decode("unicode_escape")
+        program.extend(ord(n) for n in chars)
     else:
         print(f"{lineno}: unknown PP directive {directive}")
 
@@ -82,7 +87,7 @@ def first_pass(filename, schema):
                 raw_opcode = parts[0]
                 opcode = raw_opcode.lower()
                 if opcode.startswith("#"):
-                    do_pp_directive(lineno, opcode, parts[1:], program)
+                    do_pp_directive(lineno, opcode, parts[1:], program, line)
                 elif opcode.startswith(":"):
                     label_name = opcode.lstrip(":")
                     label_table[label_name] = len(program)

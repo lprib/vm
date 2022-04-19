@@ -10,16 +10,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-VM_DEFINE_IO_INTERFACE(Print)
+VM_DEFINE_IO_INTERFACE(PrintString)
+{
+    UNUSED(outReturn);
+    vm_uint addr = args[0];
+    vm_uint chr = 0;
+    while ((chr = vm_GetMem(state, addr)) != 0)
+    {
+        printf("%c", chr);
+        addr++;
+    }
+}
+
+VM_DEFINE_IO_INTERFACE(PrintDecimal)
 {
     UNUSED(state);
     UNUSED(outReturn);
-    vm_uint arg = args[0];
-    printf("%d\n", arg);
+    printf("%d", args[0]);
+}
+
+VM_DEFINE_IO_INTERFACE(PrintChar)
+{
+    UNUSED(state);
+    UNUSED(outReturn);
+    printf("%c", args[0]);
 }
 
 // X(name, numArgs, hasReturn)
-#define IO_FNS X(Print, 1, false)
+#define IO_FNS \
+    X(PrintString, 1, false) \
+    X(PrintDecimal, 1, false) \
+    X(PrintChar, 1, false)
 
 #define X(name, args, hasReturn) {&name, args, hasReturn},
 vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS};

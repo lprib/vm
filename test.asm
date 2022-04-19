@@ -1,21 +1,42 @@
 :loop
-LOAD i
-INC
+load var_i
+inc
 
-//print square
+loadimm var_startstr
+//PrintString
+io 0
+
+//print cube
+dup
 dup
 dup
 umul
-IO 0
+umul
 
-@STORE i
+//PrintDecimal
+io 1
 
-LOAD iters
-JUMPNEQ loop
+loadimm var_endstr
+//PrintString
+io 0
 
-HALT
+@store var_i
+
+load var_iters
+jumpneq loop
+
+
+halt
 // vars
-:i
+:var_i
 #words 0
-:iters
+:var_iters
 #words 10
+
+:var_startstr
+#string Cubed value -->
+#words 0
+
+:var_endstr
+#string <--\n
+#words 0
