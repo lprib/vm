@@ -35,11 +35,20 @@ def parse_io_schema(filename):
     except:
         err(None, f"{filename} could not be opened")
 
-
-def parse_int(line_idx, arg):
+def try_parse_numeric(arg):
+    """ Try to parse numeric value. Return None on failure. """
     try:
-        return int(arg)
+        return int(arg, 0)
     except:
+        return None
+
+
+def parse_numeric_with_err(line_idx, arg):
+    """ Parse numeric value, display err and exit on failure. """
+    res = try_parse_numeric(arg)
+    if res is not None:
+        return res
+    else:
         err(line_idx, f"expected integer, got {arg}")
 
 def get_arg_value(line_idx, arg_str, io_schema):
@@ -47,9 +56,10 @@ def get_arg_value(line_idx, arg_str, io_schema):
     Read an argument (label or int). If int, return int. If label, return
     (name, current_lineno)
     """
-    try:
-        return int(arg_str)
-    except:
+    res = try_parse_numeric(arg_str)
+    if res is not None:
+        return res
+    else:
         if arg_str in io_schema:
             return io_schema.index(arg_str)
         else:
@@ -57,7 +67,7 @@ def get_arg_value(line_idx, arg_str, io_schema):
 
 def do_pp_directive(line_idx, directive, args, program, full_line, io_schema):
     if directive == "#zeros":
-        size = parse_int(line_idx, args[0])
+        size = parse_numeric_with_err(line_idx, args[0])
         program.extend([0] * size)
     elif directive == "#words":
         program.extend(get_arg_value(line_idx, arg, io_schema) for arg in args)

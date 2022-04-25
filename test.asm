@@ -28,7 +28,7 @@ halt
 :var_i
 #words 0
 :var_iters
-#words 10
+#words 0xf
 
 :var_startstr
 #string Cubed value -->
