@@ -142,6 +142,7 @@ def main():
     parser.add_argument("-f", "--io-fn-schema", metavar="FILE", dest="io_schema", help="Schema file for associating IO function names to indices. List of fn names, one per line, in index order.")
     parser.add_argument("-e", "--endian", dest="endian", choices=["big", "little"], default="little", help="endianness of 16bit bytecode words")
     parser.add_argument("-o", "--output", metavar="FILE", dest="output", required=True, help="output file")
+    parser.add_argument("-D", "--dump", action="store_true", dest="do_dump", help="Dump the parsed opcode, io schema, and program IR")
     parser.add_argument('input_file', metavar="FILE", help="input file")
 
     args = parser.parse_args()
@@ -153,6 +154,18 @@ def main():
         io_schema = []
 
     program, label_table = first_pass(args.input_file, schema, io_schema)
+
+    if args.do_dump:
+        print("OPCODE SCHEMA:")
+        print(schema)
+        print("IO SCHEMA:")
+        print(io_schema)
+        print("LABEL TABLE:")
+        print(label_table)
+        print("PROGRAM IR:")
+        print(program)
+        sys.exit(0)
+
     is_big_endian = args.endian == "big"
     second_pass(args.output, program, label_table, is_big_endian)
 
