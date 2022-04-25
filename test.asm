@@ -3,8 +3,7 @@ load var_i
 inc
 
 loadimm var_startstr
-//PrintString
-io 0
+io PrintString
 
 //print cube
 dup
@@ -13,12 +12,10 @@ dup
 umul
 umul
 
-//PrintDecimal
-io 1
+io PrintDecimal
 
 loadimm var_endstr
-//PrintString
-io 0
+io PrintString
 
 @store var_i
 

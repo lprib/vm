@@ -208,7 +208,16 @@ by the platform, `vm_ProcessOpcode` will return `VM_PROCESS_ERROR_UNDEF_IO_FN`.
 
 :label
 jump label
-// all args can take an int or a label name
+// all args can take an int or a label name, or IO function name using
+// -f/--io-function-schema argument.
+
+// Uses the name of a function from io schema. Io functions take precedence
+// over label names. (PrintChar will be interpreted as label address if it is not
+// found in the IO function schema)
+io PrintChar
+// can also just use the fn index:
+io 2
+
 
 // normal add
 add

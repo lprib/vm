@@ -40,7 +40,7 @@ def parse_int(lineno, arg):
         print(f"{lineno}: expected integer, got {arg}")
         sys.exit(1)
 
-def get_arg_value(lineno, arg_str):
+def get_arg_value(lineno, arg_str, io_schema):
     """
     Read an argument (label or int). If int, return int. If label, return
     (name, current_lineno)
@@ -48,14 +48,17 @@ def get_arg_value(lineno, arg_str):
     try:
         return int(arg_str)
     except:
-        return arg_str, lineno
+        if arg_str in io_schema:
+            return io_schema.index(arg_str)
+        else:
+            return arg_str, lineno
 
-def do_pp_directive(lineno, directive, args, program, full_line):
+def do_pp_directive(lineno, directive, args, program, full_line, io_schema):
     if directive == "#zeros":
         size = parse_int(lineno, args[0])
         program.extend([0] * size)
     elif directive == "#words":
-        program.extend(get_arg_value(lineno, arg) for arg in args)
+        program.extend(get_arg_value(lineno, arg, io_schema) for arg in args)
     elif directive == "#string":
         assert full_line.startswith("#string "), "bad string directive"
         string = full_line.lstrip("#string ")
@@ -64,7 +67,7 @@ def do_pp_directive(lineno, directive, args, program, full_line):
     else:
         print(f"{lineno}: unknown PP directive {directive}")
 
-def first_pass(filename, schema):
+def first_pass(filename, schema, io_schema):
     """ First pass, with label refs generated as placeholder tuple (name, source_lineno).
         Returns program, label_table. label_table is map name -> index
     """
@@ -87,7 +90,7 @@ def first_pass(filename, schema):
                 raw_opcode = parts[0]
                 opcode = raw_opcode.lower()
                 if opcode.startswith("#"):
-                    do_pp_directive(lineno, opcode, parts[1:], program, line)
+                    do_pp_directive(lineno, opcode, parts[1:], program, line, io_schema)
                 elif opcode.startswith(":"):
                     label_name = opcode.lstrip(":")
                     label_table[label_name] = len(program)
@@ -107,7 +110,7 @@ def first_pass(filename, schema):
                         sys.exit(1)
 
                     program.append(schema[opcode][0] | peek_mask)
-                    program.extend(get_arg_value(lineno, arg_str) for arg_str in parts[1:])
+                    program.extend(get_arg_value(lineno, arg_str, io_schema) for arg_str in parts[1:])
     except Exception:
         print(traceback.format_exc())
         print(f"{filename} could not be opened")
@@ -135,8 +138,8 @@ def second_pass(outfile, program, label_table, big_endian):
 
 def main():
     parser = argparse.ArgumentParser(description="VM bytecode assembler")
-    parser.add_argument("-s", "--schema", metavar="FILE", dest="schema", default="./out/opcode_schema.csv", help="opcode schema csv file")
-    parser.add_argument("-f", "--io-fn-schema", metavar="FILE", dest="io_schema", help="Schema file for associating IO function names to indices.")
+    parser.add_argument("-s", "--schema", metavar="FILE", dest="schema", default="./out/opcode_schema.csv", help="opcode schema CSV file: col1=opcode_name, col2=numInlineArgs")
+    parser.add_argument("-f", "--io-fn-schema", metavar="FILE", dest="io_schema", help="Schema file for associating IO function names to indices. List of fn names, one per line, in index order.")
     parser.add_argument("-e", "--endian", dest="endian", choices=["big", "little"], default="little", help="endianness of 16bit bytecode words")
     parser.add_argument("-o", "--output", metavar="FILE", dest="output", required=True, help="output file")
     parser.add_argument('input_file', metavar="FILE", help="input file")
@@ -146,11 +149,10 @@ def main():
 
     if args.io_schema is not None:
         io_schema = parse_io_schema(args.io_schema)
+    else:
+        io_schema = []
 
-    print(schema)
-    program, label_table = first_pass(args.input_file, schema)
-    print(label_table)
-    print(program)
+    program, label_table = first_pass(args.input_file, schema, io_schema)
     is_big_endian = args.endian == "big"
     second_pass(args.output, program, label_table, is_big_endian)
 

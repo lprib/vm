@@ -98,7 +98,8 @@ $(IMPL_DIRS): %: | $(OUT_DIR)/%
 
 # Test targets for quick compiling impl/linux, assembling test.asm and running test.o
 interp: schema impl/linux
-	./asm.py test.asm -elittle -o ./out/asm_test.o
+	./out/impl/linux/main --print-io-fns > ./out/linux_io_fn_schema.csv
+	./asm.py test.asm -elittle -o./out/asm_test.o -f./out/linux_io_fn_schema.csv -s./out/opcode_schema.csv
 	./out/impl/linux/main out/asm_test.o
 
 .PHONY: interp
