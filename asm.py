@@ -2,15 +2,21 @@
 
 import sys
 import argparse
-from enum import Enum, auto
 import traceback
 
 # Always assume 16 bit width in assembler
 PEEK_BITMASK = 1 << 15
 
+def err(line_idx, msg):
+    if line_idx is not None:
+        # Line number is idx + 1
+        print(f"{line_idx + 1}: error: {msg}")
+    else:
+        print(f"error: {msg}")
+    sys.exit(1)
+
 def parse_opcode_schema(filename):
     """ Generates map: name -> (opcode_value, num_args) """
-    print(f"Reading schema from {filename}");
     opcodeSchema = {}
     try:
         with open(filename) as f:
@@ -19,28 +25,24 @@ def parse_opcode_schema(filename):
                 opcodeSchema[split[0].lower()] = (i, int(split[1]))
         return opcodeSchema
     except:
-        print(f"{filename} could not be opened")
-        sys.exit(0)
+        err(None, f"{filename} could not be opened")
 
 def parse_io_schema(filename):
     """ Generates list of function names from io fn schema """
-    print(f"Reading io fn schema from {filename}")
     try:
         with open(filename) as f:
             return [line.strip() for line in f.readlines()]
     except:
-        print(f"{filename} could not be opened")
-        sys.exit(0)
+        err(None, f"{filename} could not be opened")
 
 
-def parse_int(lineno, arg):
+def parse_int(line_idx, arg):
     try:
         return int(arg)
     except:
-        print(f"{lineno}: expected integer, got {arg}")
-        sys.exit(1)
+        err(line_idx, f"expected integer, got {arg}")
 
-def get_arg_value(lineno, arg_str, io_schema):
+def get_arg_value(line_idx, arg_str, io_schema):
     """
     Read an argument (label or int). If int, return int. If label, return
     (name, current_lineno)
@@ -51,21 +53,22 @@ def get_arg_value(lineno, arg_str, io_schema):
         if arg_str in io_schema:
             return io_schema.index(arg_str)
         else:
-            return arg_str, lineno
+            return arg_str, line_idx
 
-def do_pp_directive(lineno, directive, args, program, full_line, io_schema):
+def do_pp_directive(line_idx, directive, args, program, full_line, io_schema):
     if directive == "#zeros":
-        size = parse_int(lineno, args[0])
+        size = parse_int(line_idx, args[0])
         program.extend([0] * size)
     elif directive == "#words":
-        program.extend(get_arg_value(lineno, arg, io_schema) for arg in args)
+        program.extend(get_arg_value(line_idx, arg, io_schema) for arg in args)
     elif directive == "#string":
-        assert full_line.startswith("#string "), "bad string directive"
+        if not full_line.startswith("#string "):
+            err(line_idx, f"bad #string directive")
         string = full_line.lstrip("#string ")
         chars = bytes(string, "utf-8").decode("unicode_escape")
         program.extend(ord(n) for n in chars)
     else:
-        print(f"{lineno}: unknown PP directive {directive}")
+        err(line_idx, f"unknown preprocessor directive {directive}")
 
 def first_pass(filename, schema, io_schema):
     """ First pass, with label refs generated as placeholder tuple (name, source_lineno).
@@ -75,7 +78,7 @@ def first_pass(filename, schema, io_schema):
     label_table = {}
     try:
         with open(filename) as f:
-            for lineno, line in enumerate(f.readlines()):
+            for line_idx, line in enumerate(f.readlines()):
                 line = line.strip()
                 #skip comments
                 if line.startswith("//"):
@@ -90,7 +93,7 @@ def first_pass(filename, schema, io_schema):
                 raw_opcode = parts[0]
                 opcode = raw_opcode.lower()
                 if opcode.startswith("#"):
-                    do_pp_directive(lineno, opcode, parts[1:], program, line, io_schema)
+                    do_pp_directive(line_idx, opcode, parts[1:], program, line, io_schema)
                 elif opcode.startswith(":"):
                     label_name = opcode.lstrip(":")
                     label_table[label_name] = len(program)
@@ -101,20 +104,16 @@ def first_pass(filename, schema, io_schema):
                         peek_mask = PEEK_BITMASK
 
                     if opcode not in schema:
-                        print(f"{lineno}: unknown opcode {raw_opcode}")
-                        sys.exit(1)
+                        err(line_idx, f"unknown opcode {raw_opcode}")
                     num_args = len(parts) - 1
                     if schema[opcode][1] != num_args:
-                        print(f"{lineno}: opcode {raw_opcode} expected {schema[opcode][1]} args, got {num_args}")
-                        # TODO don't exit early?
-                        sys.exit(1)
+                        err(line_idx, f"opcode {raw_opcode} expected {schema[opcode][1]} args, got {num_args}")
 
                     program.append(schema[opcode][0] | peek_mask)
-                    program.extend(get_arg_value(lineno, arg_str, io_schema) for arg_str in parts[1:])
+                    program.extend(get_arg_value(line_idx, arg_str, io_schema) for arg_str in parts[1:])
     except Exception:
         print(traceback.format_exc())
-        print(f"{filename} could not be opened")
-        sys.exit(0)
+        err(None, f"{filename} could not be opened")
 
     return program, label_table
 
@@ -129,7 +128,7 @@ def second_pass(outfile, program, label_table, big_endian):
                 if label_name in label_table:
                     to_write = label_table[label_name]
                 else:
-                    print(f"{label_lineno}: undefined label {label_name}")
+                    err(label_lineno, f"undefined label {label_name}")
             else:
                 to_write = n
             endian = "big" if big_endian else "little"
