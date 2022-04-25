@@ -2,6 +2,7 @@
 #include "vm_ProcessOpcode.h"
 
 #include <argp.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,6 +13,7 @@ static char cmd_args_doc[] = "[FILENAME]";
 
 typedef struct
 {
+    bool do_print_io_fns;
     char * input_file;
 } arguments_t;
 
@@ -20,7 +22,8 @@ static error_t parse_opt(int key, char * arg, struct argp_state * state)
     arguments_t * arguments = state->input;
     switch (key)
     {
-    case 't':
+    case 'p':
+        arguments->do_print_io_fns = true;
         break;
     case ARGP_KEY_ARG:
         if (state->arg_num > 0)
@@ -50,7 +53,12 @@ static error_t parse_opt(int key, char * arg, struct argp_state * state)
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 static struct argp_option cmd_options[] = {
-    {"test", 't', "TEST_INPUT", 0, "A test cmdline flag"}};
+    {"print-io-fns",
+     'p',
+     NULL,
+     0,
+     "Print the io function names in order of index"},
+    {0}};
 
 static struct argp cmd_argp = {cmd_options, parse_opt, cmd_args_doc, cmd_doc};
 
@@ -60,9 +68,18 @@ int main(int argc, char ** argv)
 {
     arguments_t args;
     args.input_file = NULL;
+    args.do_print_io_fns = false;
     argp_parse(&cmd_argp, argc, argv, 0, 0, &args);
+
+    if (args.do_print_io_fns)
+    {
+        li_PrintIoFunctions();
+        return 0;
+    }
+
     li_InitInterpreter(100, 100);
     li_loadProgramResult_t res = li_LoadProgram(args.input_file);
+
     switch (res)
     {
     case LOAD_FAILURE_COULD_NOT_OPEN_FILE:
@@ -81,6 +98,7 @@ int main(int argc, char ** argv)
     switch (run_result)
     {
     case VM_PROCESS_CONTINUE:
+        // Shouldn't happen
         break;
     case VM_PROCESS_PROGRAM_HALT:
         printf("Finished successfully.\n");
@@ -92,4 +110,6 @@ int main(int argc, char ** argv)
         printf("Invalid opcode\n");
     }
     li_DestroyInterpreter();
+
+    return 0;
 }

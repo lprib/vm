@@ -100,3 +100,10 @@ void li_DestroyInterpreter(void)
     free(mem);
     free(stack);
 }
+
+void li_PrintIoFunctions(void)
+{
+#define X(name, _numArgs, _hasReturn) printf(#name "\n");
+    IO_FNS
+#undef X
+}

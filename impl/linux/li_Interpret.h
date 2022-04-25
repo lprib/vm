@@ -14,5 +14,6 @@ void li_InitInterpreter(int const mem_size, int const stack_size);
 li_loadProgramResult_t li_LoadProgram(char const * filename);
 vm_programTickResult_t li_RunProgram(void);
 void li_DestroyInterpreter(void);
+void li_PrintIoFunctions(void);
 
 #endif
