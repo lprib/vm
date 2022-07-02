@@ -3,9 +3,11 @@
 import sys
 import argparse
 import traceback
+import re
 
 # Always assume 16 bit width in assembler
 PEEK_BITMASK = 1 << 15
+CHAR_LITERAL_REGEX = re.compile("'(.)'")
 
 def err(line_idx, msg):
     if line_idx is not None:
@@ -37,7 +39,12 @@ def parse_io_schema(filename):
 
 def try_parse_numeric(arg):
     """ Try to parse numeric value. Return None on failure. """
+    char_match = CHAR_LITERAL_REGEX.match(arg)
+    if char_match is not None:
+        return ord(char_match.group(1))
+
     try:
+        # Radix zero matches 0x, 0o, 0b prefixes to set radix
         return int(arg, 0)
     except:
         return None

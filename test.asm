@@ -1,3 +1,9 @@
+loadimm 'Q'
+io PrintChar
+
+loadimm 10
+io PrintChar
+
 :loop
 load var_i
 inc
