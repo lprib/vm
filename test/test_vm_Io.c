@@ -34,11 +34,13 @@ vm_uint vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uint index)
 
 static bool noArgsNoReturnCalled = false;
 
-static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn) {
+static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn)
+{
     UNUSED(state);
     UNUSED(args);
     UNUSED(outReturn);
-    noArgsNoReturnCalled = true; }
+    noArgsNoReturnCalled = true;
+}
 
 static bool twoArgsOneReturnCalled = false;
 static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
@@ -133,10 +135,17 @@ TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
     ASSERT(stack[stack_idx + 2] == 12);
 }
 
+TEST_DEFINE_SUITE(my_suite)
+
 int main(void)
 {
     test_NoArgsNoReturnNoPeek();
     test_NoArgsNoReturnPeek();
     test_TwoArgsOneReturnNoPeek();
     test_TwoArgsOneReturnPeek();
+
+    test_StartSuite();
+    ASSERT_OP(1, ==, 2);
+    ASSERT2(0);
+    test_EndSuite();
 }
