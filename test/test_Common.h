@@ -9,17 +9,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ASSERT(test) assert(test)
-#define ASSERT_MSG(test, msg) assert(((void)(msg), test))
-
-#define TEST_DEFINE_CASE(name) \
-    static void test_##name(void) \
-    { \
-        printf("%s::%s\n", __FILE__, #name);
-
 #define TEST_DEFINE_SUITE(name) \
-    static char const _suite_name[] = #name; \
+    static char const _suite_name[] __attribute__((unused)) = #name; \
     static test_assertResultVec_t _assert_results;
+
+#ifdef PRINT_TESTCASE_RUNNING
+    #define TEST_DEFINE_CASE(name) TEST_DEFINE_CASE_PRINT_RUNNING(name)
+#else
+    #define TEST_DEFINE_CASE(name) TEST_DEFINE_CASE_NO_PRINT_RUNNING(name)
+#endif
 
 #define test_StartSuite() \
     do \
@@ -67,9 +65,9 @@
         } \
     } while (0)
 
-#define ASSERT2(expr) ASSERT2_MSG((expr), DEFAULT_MESSAGE)
+#define ASSERT(expr) ASSERT_MSG((expr), DEFAULT_MESSAGE)
 
-#define ASSERT2_MSG(expr, msg) \
+#define ASSERT_MSG(expr, msg) \
     do \
     { \
         typeof(expr) _expr = (expr); \
@@ -89,6 +87,20 @@
                     .data2 = 0}); \
         } \
     } while (0)
+
+#define TEST_DEFINE_CASE_PRINT_RUNNING(name) \
+    static void testcase_##name(void); \
+    static void name(void) \
+    { \
+        printf("Running %s::%s\n", __FILE__, #name); \
+        testcase_##name(); \
+    } \
+    static void testcase_##name(void)
+
+#define TEST_DEFINE_CASE_NO_PRINT_RUNNING(name) \
+    static void testcase_##name(void); \
+    static void name(void) { testcase_##name(); } \
+    static void testcase_##name(void)
 
 #define DEFAULT_MESSAGE "no description"
 

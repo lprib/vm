@@ -5,6 +5,8 @@
 
 #include <string.h>
 
+TEST_DEFINE_SUITE(ProcessOpcode)
+
 // start at 1 since we only mock 2 elements on the stack
 static vm_uint stack[100];
 static vm_uint mem[100];
@@ -124,6 +126,7 @@ bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex, bool peek)
 // TEST CASES:
 
 TEST_DEFINE_CASE(Load)
+{
     // Program: Load value at addr 51 to stack
     // Stack: 2 zeros
     ResetState(VM_OP_LOAD, 50, 0, 0);
@@ -136,6 +139,7 @@ TEST_DEFINE_CASE(Load)
 }
 
 TEST_DEFINE_CASE(Store)
+{
     ResetState(VM_OP_STORE, 50, 99, 1);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
@@ -152,6 +156,7 @@ TEST_DEFINE_CASE(Store)
 }
 
 TEST_DEFINE_CASE(LoadImm)
+{
     ResetState(VM_OP_LOADIMM, 12, 0, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
@@ -160,6 +165,7 @@ TEST_DEFINE_CASE(LoadImm)
 }
 
 TEST_DEFINE_CASE(Deref)
+{
     ResetState(VM_OP_DEREF, 123, 1, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
@@ -168,6 +174,7 @@ TEST_DEFINE_CASE(Deref)
 }
 
 TEST_DEFINE_CASE(ArrayLoad)
+{
     // testing access of array at memory idx 5, struct offset 1, struct size 2,
     // index 2
     vm_uint testmem[] = {
@@ -203,6 +210,7 @@ TEST_DEFINE_CASE(ArrayLoad)
 }
 
 TEST_DEFINE_CASE(ArrayStore)
+{
     const vm_uint base = 4;
     const vm_uint offset = 2;
     const vm_uint size = 3;
@@ -239,6 +247,7 @@ TEST_DEFINE_CASE(ArrayStore)
 }
 
 TEST_DEFINE_CASE(PickWithoutPeek)
+{
     ResetState(VM_OP_PICK, 56, 12, 34);
     vm_TakeStack_called = false;
     vm_TakeStack_index = -1;
@@ -251,6 +260,7 @@ TEST_DEFINE_CASE(PickWithoutPeek)
 }
 
 TEST_DEFINE_CASE(PickWithPeek)
+{
     ResetState(VM_PEEK_BITMASK | VM_OP_PICK, 0, 12, 34);
     vm_TakeStack_called = false;
     ProcessNextShouldContinue();
@@ -273,6 +283,7 @@ TEST_DEFINE_CASE(PickWithPeek)
 }
 
 TEST_DEFINE_CASE(Dup)
+{
     ResetState(VM_OP_DUP, 0, 31, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 3);
@@ -282,6 +293,7 @@ TEST_DEFINE_CASE(Dup)
 }
 
 TEST_DEFINE_CASE(Swap)
+{
     ResetState(VM_OP_SWAP, 0, 12, 34);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
@@ -300,6 +312,7 @@ TEST_DEFINE_CASE(Swap)
 }
 
 TEST_DEFINE_CASE(Drop)
+{
     ResetState(VM_OP_DROP, 0, 31, 5);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
@@ -308,6 +321,7 @@ TEST_DEFINE_CASE(Drop)
 }
 
 TEST_DEFINE_CASE(BinaryOps)
+{
     ResetState(VM_OP_ADD, 0, 3, 4);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 1);
@@ -338,6 +352,7 @@ TEST_DEFINE_CASE(BinaryOps)
 }
 
 TEST_DEFINE_CASE(Shifts)
+{
     // Note this test is not vm_int bitwidth agnostic (TODO change that)
 
     ResetState(VM_OP_SHL, 0, 2, 1024);
@@ -368,6 +383,7 @@ TEST_DEFINE_CASE(Shifts)
 }
 
 TEST_DEFINE_CASE(UnaryOps)
+{
     ResetState(VM_OP_INC, 0, 3, 0);
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
@@ -382,6 +398,7 @@ TEST_DEFINE_CASE(UnaryOps)
 }
 
 TEST_DEFINE_CASE(JumpsTaken)
+{
     ResetState(VM_OP_JUMP, 55, 0, 0);
     ProcessNextShouldContinue();
     ASSERT(test_state.pc - mem == 55);
@@ -406,6 +423,7 @@ TEST_DEFINE_CASE(JumpsTaken)
 }
 
 TEST_DEFINE_CASE(JumpsNotTaken)
+{
     ResetState(VM_OP_JUMPEQ, 55, 5, 4);
     ProcessNextShouldContinue();
     ASSERT(MemWordsConsumed() == 2);
@@ -420,6 +438,7 @@ TEST_DEFINE_CASE(JumpsNotTaken)
 }
 
 TEST_DEFINE_CASE(Halt)
+{
     ResetState(VM_OP_HALT, 0, 0, 0);
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
     ASSERT(res == VM_PROCESS_PROGRAM_HALT);
@@ -427,6 +446,7 @@ TEST_DEFINE_CASE(Halt)
 }
 
 TEST_DEFINE_CASE(IoCallValid)
+{
     ResetState(VM_OP_IO, 10, 0, 0);
     functionIsValid = true;
     lastPeekFlag = false;
@@ -445,6 +465,7 @@ TEST_DEFINE_CASE(IoCallValid)
 }
 
 TEST_DEFINE_CASE(IoCallInvalid)
+{
     ResetState(VM_OP_IO, 5, 0, 0);
     functionIsValid = false;
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
@@ -454,6 +475,7 @@ TEST_DEFINE_CASE(IoCallInvalid)
 }
 
 TEST_DEFINE_CASE(InvalidOpcode)
+{
     ResetState(65535, 0, 0, 0);
     vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
     ASSERT(res == VM_PROCESS_ERROR_INVALID_OPCODE);
@@ -461,25 +483,29 @@ TEST_DEFINE_CASE(InvalidOpcode)
 
 int main(void)
 {
-    test_Load();
-    test_Store();
-    test_LoadImm();
-    test_Deref();
-    test_ArrayLoad();
-    test_ArrayStore();
-    test_PickWithPeek();
-    test_PickWithoutPeek();
-    test_Dup();
-    test_Swap();
-    test_Drop();
-    test_BinaryOps();
-    test_Shifts();
-    test_UnaryOps();
-    test_JumpsTaken();
-    test_JumpsNotTaken();
-    test_Halt();
-    test_IoCallValid();
-    test_IoCallInvalid();
-    test_InvalidOpcode();
+    test_StartSuite();
+
+    Load();
+    Store();
+    LoadImm();
+    Deref();
+    ArrayLoad();
+    ArrayStore();
+    PickWithPeek();
+    PickWithoutPeek();
+    Dup();
+    Swap();
+    Drop();
+    BinaryOps();
+    Shifts();
+    UnaryOps();
+    JumpsTaken();
+    JumpsNotTaken();
+    Halt();
+    IoCallValid();
+    IoCallInvalid();
+    InvalidOpcode();
+
+    test_EndSuite();
     return 0;
 }

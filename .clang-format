@@ -17,6 +17,4 @@ SortIncludes: CaseInsensitive
 # Regroup includes based on categories (main header, library <>, other header "")
 IncludeBlocks: Regroup
 
-MacroBlockBegin: "^TEST_DEFINE_CASE"
-
 # vim: set filetype=yaml:

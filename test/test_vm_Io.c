@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+TEST_DEFINE_SUITE(my_suite)
+
 #define STACK_SIZE 10
 static int stack_idx;
 static vm_uint stack[STACK_SIZE];
@@ -72,6 +74,7 @@ static void ResetStack(void)
 static int ItemsOnStack(void) { return STACK_SIZE - stack_idx; }
 
 TEST_DEFINE_CASE(NoArgsNoReturnNoPeek)
+{
     ResetStack();
     noArgsNoReturnCalled = false;
 
@@ -84,6 +87,7 @@ TEST_DEFINE_CASE(NoArgsNoReturnNoPeek)
 }
 
 TEST_DEFINE_CASE(NoArgsNoReturnPeek)
+{
     ResetStack();
     noArgsNoReturnCalled = false;
 
@@ -96,6 +100,7 @@ TEST_DEFINE_CASE(NoArgsNoReturnPeek)
 }
 
 TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
+{
     ResetStack();
     twoArgsOneReturnCalled = false;
 
@@ -115,6 +120,7 @@ TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
 }
 
 TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
+{
     ResetStack();
     twoArgsOneReturnCalled = false;
 
@@ -135,17 +141,14 @@ TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
     ASSERT(stack[stack_idx + 2] == 12);
 }
 
-TEST_DEFINE_SUITE(my_suite)
-
 int main(void)
 {
-    test_NoArgsNoReturnNoPeek();
-    test_NoArgsNoReturnPeek();
-    test_TwoArgsOneReturnNoPeek();
-    test_TwoArgsOneReturnPeek();
-
     test_StartSuite();
-    ASSERT_OP(1, ==, 2);
-    ASSERT2(0);
+
+    NoArgsNoReturnNoPeek();
+    NoArgsNoReturnPeek();
+    TwoArgsOneReturnNoPeek();
+    TwoArgsOneReturnPeek();
+
     test_EndSuite();
 }

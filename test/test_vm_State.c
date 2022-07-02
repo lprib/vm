@@ -2,6 +2,8 @@
 #include "vm_BaseTypes.h"
 #include "vm_State.h"
 
+TEST_DEFINE_SUITE(State)
+
 #include <stdlib.h>
 
 #define STACK_SIZE 100
@@ -25,6 +27,7 @@ static int ItemsOnStack(vm_state_t * state)
 }
 
 TEST_DEFINE_CASE(Init)
+{
     vm_state_t test_state;
     vm_uint const stack_size = 50;
     vm_uint const mem_size = 100;
@@ -42,6 +45,7 @@ TEST_DEFINE_CASE(Init)
 }
 
 TEST_DEFINE_CASE(PushPop)
+{
     vm_state_t state = NewTestState();
     vm_PushStack(&state, 1);
     vm_PushStack(&state, 12);
@@ -57,6 +61,7 @@ TEST_DEFINE_CASE(PushPop)
 }
 
 TEST_DEFINE_CASE(GetMemAndIncrement)
+{
     vm_state_t state = NewTestState();
 
     state.mem[0] = 55;
@@ -69,6 +74,7 @@ TEST_DEFINE_CASE(GetMemAndIncrement)
 }
 
 TEST_DEFINE_CASE(Peek)
+{
     vm_state_t state = NewTestState();
     vm_PushStack(&state, 77);
     vm_PushStack(&state, 66);
@@ -79,6 +85,7 @@ TEST_DEFINE_CASE(Peek)
 }
 
 TEST_DEFINE_CASE(Take)
+{
     vm_state_t state = NewTestState();
     vm_PushStack(&state, 77);
     vm_PushStack(&state, 66);
@@ -113,10 +120,14 @@ TEST_DEFINE_CASE(Take)
 
 int main(void)
 {
-    test_Init();
-    test_PushPop();
-    test_GetMemAndIncrement();
-    test_Peek();
-    test_Take();
+    test_StartSuite();
+
+    Init();
+    PushPop();
+    GetMemAndIncrement();
+    Peek();
+    Take();
+
+    test_EndSuite();
     return 0;
 }
