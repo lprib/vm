@@ -55,7 +55,7 @@ Provide stack overflow and underflow hooks
 - [ ] make asm.py generate source mappings from byte index to source line#
 - [ ] With more detailed error return from processnextopcode, integrate into
   source mappings from asm.py
-- [ ] Remove the packed offset&size field for ARRAY_LOAD and ARRAY_STORE. Can
+- [x] Remove the packed offset&size field for ARRAY_LOAD and ARRAY_STORE. Can
   make a compressed ISA later...
 - [ ] ARRAYLOAD/ARRAYSTORE should be LOADARRAY/STOREARRAY for symmetry
 - [ ] paranoid mode which checks all mem derefs for out of bounds and stack over/underflow

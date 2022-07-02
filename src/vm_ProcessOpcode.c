@@ -54,10 +54,9 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     case VM_OP_ARRAYLOAD:
     {
         vm_uint base = vm_GetProgramAndIncrement(s);
-        vm_uint offset_and_size = vm_GetProgramAndIncrement(s);
+        vm_uint offset = vm_GetProgramAndIncrement(s);
+        vm_uint size = vm_GetProgramAndIncrement(s);
 
-        vm_uint offset = offset_and_size >> VM_HIGH_PART_SHIFT;
-        vm_uint size = offset_and_size & VM_LOW_PART_MASK;
         vm_uint index = POP_OR_PEEK(s, 0);
         vm_PushStack(s, vm_GetMem(s, base + index * size + offset));
     }
@@ -66,10 +65,9 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     case VM_OP_ARRAYSTORE:
     {
         vm_uint base = vm_GetProgramAndIncrement(s);
-        vm_uint offset_and_size = vm_GetProgramAndIncrement(s);
+        vm_uint offset = vm_GetProgramAndIncrement(s);
+        vm_uint size = vm_GetProgramAndIncrement(s);
 
-        vm_uint offset = offset_and_size >> VM_HIGH_PART_SHIFT;
-        vm_uint size = offset_and_size & VM_LOW_PART_MASK;
         vm_uint index = POP_OR_PEEK(s, 0);
         vm_uint val = POP_OR_PEEK(s, 1);
 

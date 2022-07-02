@@ -168,12 +168,14 @@ TEST_DEFINE_CASE(Deref)
 }
 
 TEST_DEFINE_CASE(ArrayLoad)
-    // testing access of array at memory idx 4, struct offset 1, struct size 2,
+    // testing access of array at memory idx 5, struct offset 1, struct size 2,
     // index 2
     vm_uint testmem[] = {
         VM_OP_ARRAYLOAD,
-        4,
-        VM_PACK_TO_INT(1, 2),
+        5,
+        1,
+        2,
+
         0,
         55, // array start, idx 0
         10,
@@ -187,7 +189,7 @@ TEST_DEFINE_CASE(ArrayLoad)
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 2);
     ASSERT(*test_state.sp == 12);
-    ASSERT(MemWordsConsumed() == 3);
+    ASSERT(MemWordsConsumed() == 4);
 
     // set peek
     testmem[0] |= VM_PEEK_BITMASK;
@@ -197,7 +199,7 @@ TEST_DEFINE_CASE(ArrayLoad)
     ASSERT(test_state.sp[0] == 12);
     // Should leave index on stack
     ASSERT(test_state.sp[1] == 2);
-    ASSERT(MemWordsConsumed() == 3);
+    ASSERT(MemWordsConsumed() == 4);
 }
 
 TEST_DEFINE_CASE(ArrayStore)
@@ -209,7 +211,8 @@ TEST_DEFINE_CASE(ArrayStore)
     vm_uint testmem[] = {
         VM_OP_ARRAYSTORE,
         base,
-        VM_PACK_TO_INT(offset, size),
+        offset,
+        size,
         0,
         1, // array start, idx 0
         1,
@@ -222,7 +225,7 @@ TEST_DEFINE_CASE(ArrayStore)
     ProcessNextShouldContinue();
     ASSERT(ItemsOnStack() == 0);
     ASSERT(mem[base + index * size + offset] == 123);
-    ASSERT(MemWordsConsumed() == 3);
+    ASSERT(MemWordsConsumed() == 4);
 
     // set peek
     testmem[0] |= VM_PEEK_BITMASK;
@@ -232,7 +235,7 @@ TEST_DEFINE_CASE(ArrayStore)
     ASSERT(mem[base + index * size + offset] == 123);
     ASSERT(test_state.sp[0] == index);
     ASSERT(test_state.sp[1] == 123);
-    ASSERT(MemWordsConsumed() == 3);
+    ASSERT(MemWordsConsumed() == 4);
 }
 
 TEST_DEFINE_CASE(PickWithoutPeek)
