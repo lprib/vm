@@ -37,14 +37,12 @@ VM_DEFINE_IO_INTERFACE(PrintChar)
 }
 
 // X(name, numArgs, hasReturn)
-#define IO_FNS \
-    X(PrintString, 1, false) \
-    X(PrintDecimal, 1, false) \
-    X(PrintChar, 1, false)
+#define IO_FNS(x) \
+    x(PrintString, 1, false) x(PrintDecimal, 1, false) x(PrintChar, 1, false)
 
-#define X(name, args, hasReturn) {&name, args, hasReturn},
-vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS};
-#undef X
+#define GEN_IO_FN_REGISTRY_ITEM(name, args, hasReturn) {&name, args, hasReturn},
+
+vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
@@ -103,7 +101,8 @@ void li_DestroyInterpreter(void)
 
 void li_PrintIoFunctions(void)
 {
-#define X(name, _numArgs, _hasReturn) printf(#name "\n");
-    IO_FNS
-#undef X
+#define GEN_IO_FN_PRINT_STATEMENT(name, _numArgs, _hasReturn) \
+    printf(#name "\n");
+
+    IO_FNS(GEN_IO_FN_PRINT_STATEMENT)
 }

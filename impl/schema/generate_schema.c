@@ -4,12 +4,7 @@
 
 /** Ouptputs opcode schema in CSV form to std output. This allows schema used
  * in assembler to evolve with the code */
-int main(void)
-{
-#define X(name, numInlineArgs, _operation) \
+#define GEN_OPCODE_PRINTER(name, numInlineArgs, _operation) \
     printf(#name "," #numInlineArgs "\n");
 
-    VM_ALL_OPCODES
-
-#undef X
-}
+int main(void) { VM_ALL_OPCODES(GEN_OPCODE_PRINTER) }

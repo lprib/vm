@@ -60,7 +60,8 @@ Provide stack overflow and underflow hooks
 - [ ] ARRAYLOAD/ARRAYSTORE should be LOADARRAY/STOREARRAY for symmetry
 - [ ] paranoid mode which checks all mem derefs for out of bounds and stack over/underflow
 - [ ] Don't need vm_GetMem as the internals are already used in ProcessOpcode for jumps
-- [ ] strings
+- [x] strings
+- [x] X-macros take selector
 
 ## Project structure
 - `src/` - Source headers and code (TODO separate public headers to `inc/`)

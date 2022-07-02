@@ -44,23 +44,18 @@ VM_DEFINE_IO_INTERFACE(MyPrint2)
 }
 
 // X(name, numArgs, hasReturn)
-#define MY_IO_FNS \
-    X(Return1, 0, true) \
-    X(Arg1Return1, 1, true) \
-    X(Arg3Return1, 3, true) \
-    X(MyPrint, 1, false) \
-    X(MyPrint2, 2, false)
+#define MY_IO_FNS(x) \
+    x(Return1, 0, true) x(Arg1Return1, 1, true) x(Arg3Return1, 3, true) \
+        x(MyPrint, 1, false) x(MyPrint2, 2, false)
 
-#define X(name, args, hasReturn) {&name, args, hasReturn},
-vm_ioFunctionRegistryItem_t fnRegistry[] = {MY_IO_FNS};
-#undef X
+#define GEN_IO_FN_REGISTRY_ITEM(name, args, hasReturn) {&name, args, hasReturn},
+#define GEN_IO_FN_ENUM_VALUE(name, args, hasReturn) FN_##name,
 
-#define X(name, args, hasReturn) FN_##name,
+vm_ioFunctionRegistryItem_t fnRegistry[] = {MY_IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 enum
 {
-    MY_IO_FNS
+    MY_IO_FNS(GEN_IO_FN_ENUM_VALUE)
 };
-#undef X
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,

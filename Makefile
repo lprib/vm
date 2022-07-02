@@ -135,5 +135,5 @@ debug:
 	@echo IMPL_OUT_DIRS
 	@echo $(IMPL_OUT_DIRS)
 
-.PHONY: debug integration test silen_test coverage_test coverage schema clean check
+.PHONY: debug test silen_test coverage_test coverage schema clean check
 

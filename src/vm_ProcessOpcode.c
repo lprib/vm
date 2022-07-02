@@ -134,7 +134,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     }
     break;
 
-#define X(name, _numInlineArgs, op) \
+#define GEN_JUMP_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
         vm_uint r = POP_OR_PEEK(s, 0); \
@@ -147,10 +147,9 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
     } \
     break;
 
-        VM_JUMP_OPCODES
-#undef X
+        VM_JUMP_OPCODES(GEN_JUMP_OPCODE_CASE)
 
-#define X(name, _numInlineArgs, op) \
+#define GEN_UNSIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
         vm_uint r = POP_OR_PEEK(s, 0); \
@@ -159,10 +158,10 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
         vm_PushStack(s, res); \
     } \
     break;
-        VM_UNSIGNED_BINARY_OPCODES
-#undef X
 
-#define X(name, _numInlineArgs, op) \
+        VM_UNSIGNED_BINARY_OPCODES(GEN_UNSIGNED_BINARY_OPCODE_CASE)
+
+#define GEN_SIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
         vm_uint r_unsigned = POP_OR_PEEK(s, 0); \
@@ -186,18 +185,18 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
         vm_PushStack(s, res); \
     } \
     break;
-        VM_SIGNED_BINARY_OPCODES
-#undef X
 
-#define X(name, _numInlineArgs, op) \
+        VM_SIGNED_BINARY_OPCODES(GEN_SIGNED_BINARY_OPCODE_CASE)
+
+#define GEN_UNSIGNED_UNARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
         vm_uint n = POP_OR_PEEK(s, 0); \
         vm_PushStack(s, op); \
     } \
     break;
-        VM_UNSIGNED_UNARY_OPCODES
-#undef X
+
+        VM_UNSIGNED_UNARY_OPCODES(GEN_UNSIGNED_UNARY_OPCODE_CASE)
 
     default:
     {
