@@ -88,6 +88,10 @@ Provide stack overflow and underflow hooks
   this so that it can be recompiled with coverage flags)
 - `make schema` generate `out/opcode_schema.csv` which contains names and
   number of args for all recognized opcodes.
+- `make interp` generate schema, compile impl/linux. Run impl/linux with flags
+  to generate IO function list. Run asm.py to assemble test.asm, with io
+  function schema and opcode schema. Finally, run impl/linux/main to run the
+  assembled bytecode.
 
 ### Recursive makefiles
 - Each directory in `impl/` has it's own makefile, which is invoked by

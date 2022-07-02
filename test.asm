@@ -5,28 +5,28 @@ loadimm 10
 io PrintChar
 
 :loop
-load var_i
-inc
+   load var_i
+   inc
 
-loadimm var_startstr
-io PrintString
+   loadimm var_startstr
+   io PrintString
 
-//print cube
-dup
-dup
-dup
-umul
-umul
+   //print cube
+   dup
+   dup
+   dup
+   umul
+   umul
 
-io PrintDecimal
+   io PrintDecimal
 
-loadimm var_endstr
-io PrintString
+   loadimm var_endstr
+   io PrintString
 
-@store var_i
+   @store var_i
 
-load var_iters
-jumpneq loop
+   load var_iters
+   jumpneq loop
 
 
 halt
