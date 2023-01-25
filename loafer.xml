@@ -1,0 +1,44 @@
+<?xml-model href="/home/liam/programming/loafer/config_schema.rng" type="application/xml"?>
+
+<project>
+    <outdir>out</outdir>
+
+    <artifacts>
+        <artifact name="linux" tags="exe">
+            <main>impl/linux/main.c</main>
+            <include>impl/linux</include>
+            <link>impl/linux/li_Interpret.c</link>
+        </artifact>
+        <artifact name="integration" tags="exe">
+            <main>impl/integration/main.c</main>
+        </artifact>
+
+        <artifact name="testProcessOpcode" tags="test">
+            <main>test/test_vm_ProcessOpcode.c</main>
+            <link>src/vm_ProcessOpcode.c</link>
+        </artifact>
+        <artifact name="testIo" tags="test">
+            <main>test/test_vm_Io.c</main>
+            <link>src/vm_Io.c</link>
+        </artifact>
+        <artifact name="testState" tags="test">
+            <main>test/test_vm_State.c</main>
+            <link>src/vm_State.c</link>
+        </artifact>
+    </artifacts>
+
+    <tags>
+        <tag name="global">
+            <cflags>-Wall -Wextra -flto -O3</cflags>
+        </tag>
+
+        <tag name="exe">
+            <include>src</include>
+            <link glob="true">src/*.c</link>
+        </tag>
+        <tag name="test">
+            <include>test</include>
+            <include>src</include>
+        </tag>
+    </tags>
+</project>
