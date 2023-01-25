@@ -10,7 +10,7 @@
             <link>impl/linux/li_Interpret.c</link>
         </artifact>
         <artifact name="integration" tags="exe">
-            <main>impl/integration/main.c</main>
+            <main>impl/integration_test/main.c</main>
         </artifact>
 
         <artifact name="testProcessOpcode" tags="test">
@@ -31,7 +31,6 @@
         <tag name="global">
             <cflags>-Wall -Wextra -flto -O3</cflags>
         </tag>
-
         <tag name="exe">
             <include>src</include>
             <link glob="true">src/*.c</link>
