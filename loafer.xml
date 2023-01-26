@@ -16,6 +16,7 @@
         <artifact id="testProcessOpcode" tags="test">
             <main>test/test_vm_ProcessOpcode.c</main>
             <src>src/vm_ProcessOpcode.c</src>
+            <src>src/vm_State.c</src>
         </artifact>
         <artifact id="testIo" tags="test">
             <main>test/test_vm_Io.c</main>
