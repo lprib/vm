@@ -4,40 +4,44 @@
     <outdir>out</outdir>
 
     <artifacts>
-        <artifact name="linux" tags="exe">
+        <artifact id="linux" tags="exe">
             <main>impl/linux/main.c</main>
-            <include>impl/linux</include>
-            <source>impl/linux/li_Interpret.c</source>
+            <inc>impl/linux</inc>
+            <src>impl/linux/li_Interpret.c</src>
         </artifact>
-        <artifact name="integration" tags="exe">
+        <artifact id="integration" tags="exe">
             <main>impl/integration_test/main.c</main>
         </artifact>
 
-        <artifact name="testProcessOpcode" tags="test">
+        <artifact id="testProcessOpcode" tags="test">
             <main>test/test_vm_ProcessOpcode.c</main>
-            <source>src/vm_ProcessOpcode.c</source>
+            <src>src/vm_ProcessOpcode.c</src>
         </artifact>
-        <artifact name="testIo" tags="test">
+        <artifact id="testIo" tags="test">
             <main>test/test_vm_Io.c</main>
-            <source>src/vm_Io.c</source>
+            <src>src/vm_Io.c</src>
         </artifact>
-        <artifact name="testState" tags="test">
+        <artifact id="testState" tags="test">
             <main>test/test_vm_State.c</main>
-            <source>src/vm_State.c</source>
+            <src>src/vm_State.c</src>
         </artifact>
     </artifacts>
 
     <tags>
-        <tag name="global">
-            <cflags>-Wall -Wextra -flto -O3</cflags>
+        <tag id="global">
+            <complinkflags type="shell">-Wall -Wextra -flto -O3</complinkflags>
         </tag>
-        <tag name="exe">
-            <include>src</include>
-            <source glob="true">src/*.c</source>
+        <tag id="exe">
+            <inc>src</inc>
+            <src type="glob">src/*.c</src>
         </tag>
-        <tag name="test">
-            <include>test</include>
-            <include>src</include>
+        <tag id="test">
+            <inc>test</inc>
+            <inc>src</inc>
         </tag>
     </tags>
+    
+    <scripts>
+        <script id="hello">echo hello</script>
+    </scripts>
 </project>
