@@ -7,7 +7,7 @@
         <artifact name="linux" tags="exe">
             <main>impl/linux/main.c</main>
             <include>impl/linux</include>
-            <link>impl/linux/li_Interpret.c</link>
+            <source>impl/linux/li_Interpret.c</source>
         </artifact>
         <artifact name="integration" tags="exe">
             <main>impl/integration_test/main.c</main>
@@ -15,15 +15,15 @@
 
         <artifact name="testProcessOpcode" tags="test">
             <main>test/test_vm_ProcessOpcode.c</main>
-            <link>src/vm_ProcessOpcode.c</link>
+            <source>src/vm_ProcessOpcode.c</source>
         </artifact>
         <artifact name="testIo" tags="test">
             <main>test/test_vm_Io.c</main>
-            <link>src/vm_Io.c</link>
+            <source>src/vm_Io.c</source>
         </artifact>
         <artifact name="testState" tags="test">
             <main>test/test_vm_State.c</main>
-            <link>src/vm_State.c</link>
+            <source>src/vm_State.c</source>
         </artifact>
     </artifacts>
 
@@ -33,7 +33,7 @@
         </tag>
         <tag name="exe">
             <include>src</include>
-            <link glob="true">src/*.c</link>
+            <source glob="true">src/*.c</source>
         </tag>
         <tag name="test">
             <include>test</include>
