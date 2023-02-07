@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.rng": "xml",
+        "typeinfo": "cpp",
+        "platforminterface.h": "c",
+        "test_common.h": "c"
+    }
+}

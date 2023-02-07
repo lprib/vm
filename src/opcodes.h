@@ -1,7 +1,7 @@
 #ifndef VM_OPCODES_H
 #define VM_OPCODES_H
 
-#include "vm_BaseTypes.h"
+#include "basetypes.h"
 
 // clang-format off
 

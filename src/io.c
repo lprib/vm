@@ -1,8 +1,7 @@
-#include "vm_Io.h"
-
-#include "vm_BaseTypes.h"
-#include "vm_PlatormInterface.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "io.h"
+#include "platforminterface.h"
+#include "state.h"
 
 bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex, bool peek)
 {

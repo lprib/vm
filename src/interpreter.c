@@ -1,9 +1,9 @@
-#include "vm_ProcessOpcode.h"
+#include "interpreter.h"
 
-#include "vm_BaseTypes.h"
-#include "vm_Io.h"
-#include "vm_Opcodes.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "io.h"
+#include "opcodes.h"
+#include "state.h"
 
 #include <stdbool.h>
 #include <stdio.h>

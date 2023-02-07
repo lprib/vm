@@ -1,8 +1,8 @@
-#include "vm_BaseTypes.h"
-#include "vm_Opcodes.h"
-#include "vm_PlatormInterface.h"
-#include "vm_ProcessOpcode.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "opcodes.h"
+#include "platforminterface.h"
+#include "interpreter.h"
+#include "state.h"
 
 #include <stdio.h>
 

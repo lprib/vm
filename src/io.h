@@ -1,8 +1,8 @@
 #ifndef VM_IO_H
 #define VM_IO_H
 
-#include "vm_BaseTypes.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "state.h"
 
 #include <stdbool.h>
 

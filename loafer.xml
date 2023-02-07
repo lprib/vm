@@ -4,27 +4,29 @@
     <outdir>out</outdir>
 
     <artifacts>
+        <!-- Exes -->
         <artifact id="linux" tags="exe">
             <main>impl/linux/main.c</main>
             <inc>impl/linux</inc>
-            <src>impl/linux/li_Interpret.c</src>
+            <src>impl/linux/interpreter_driver.c</src>
         </artifact>
         <artifact id="integration" tags="exe">
             <main>impl/integration_test/main.c</main>
         </artifact>
 
+        <!-- Tests -->
         <artifact id="testProcessOpcode" tags="test">
-            <main>test/test_vm_ProcessOpcode.c</main>
-            <src>src/vm_ProcessOpcode.c</src>
-            <src>src/vm_State.c</src>
+            <main>test/test_interpreter.c</main>
+            <src>src/interpreter.c</src>
+            <src>src/state.c</src>
         </artifact>
         <artifact id="testIo" tags="test">
-            <main>test/test_vm_Io.c</main>
-            <src>src/vm_Io.c</src>
+            <main>test/test_io.c</main>
+            <src>src/io.c</src>
         </artifact>
         <artifact id="testState" tags="test">
-            <main>test/test_vm_State.c</main>
-            <src>src/vm_State.c</src>
+            <main>test/test_state.c</main>
+            <src>src/state.c</src>
         </artifact>
     </artifacts>
 
@@ -41,8 +43,4 @@
             <inc>src</inc>
         </tag>
     </tags>
-    
-    <scripts>
-        <script id="hello">echo hello</script>
-    </scripts>
 </project>

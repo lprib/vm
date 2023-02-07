@@ -1,7 +1,7 @@
-#ifndef LI_INTERPRET_H
-#define LI_INTERPRET_H
+#ifndef LI_INTERPRETER_DRIVER_H
+#define LI_INTERPRETER_DRIVER_H
 
-#include "vm_ProcessOpcode.h"
+#include "interpreter.h"
 
 typedef enum
 {

@@ -1,7 +1,7 @@
 #ifndef TEST_COMMON_H
 #define TEST_COMMON_H
 
-#include "vm_State.h"
+#include "state.h"
 
 #include <assert.h>
 #include <inttypes.h>

@@ -1,7 +1,7 @@
 #ifndef VM_STATE_H
 #define VM_STATE_H
 
-#include "vm_BaseTypes.h"
+#include "basetypes.h"
 
 #include <stdint.h>
 

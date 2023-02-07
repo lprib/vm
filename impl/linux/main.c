@@ -1,5 +1,5 @@
-#include "li_Interpret.h"
-#include "vm_ProcessOpcode.h"
+#include "interpreter_driver.h"
+#include "interpreter.h"
 
 #include <argp.h>
 #include <stdbool.h>

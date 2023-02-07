@@ -1,6 +1,6 @@
-#include "test_Common.h"
-#include "vm_BaseTypes.h"
-#include "vm_State.h"
+#include "test_common.h"
+#include "basetypes.h"
+#include "state.h"
 
 TEST_DEFINE_SUITE(State)
 

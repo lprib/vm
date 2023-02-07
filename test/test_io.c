@@ -1,8 +1,8 @@
-#include "test_Common.h"
-#include "vm_BaseTypes.h"
-#include "vm_Io.h"
-#include "vm_PlatormInterface.h"
-#include "vm_State.h"
+#include "test_common.h"
+#include "basetypes.h"
+#include "io.h"
+#include "platforminterface.h"
+#include "state.h"
 
 #include <stdbool.h>
 #include <string.h>

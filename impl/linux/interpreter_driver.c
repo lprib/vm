@@ -1,9 +1,9 @@
-#include "li_Interpret.h"
+#include "interpreter_driver.h"
 
-#include "vm_BaseTypes.h"
-#include "vm_PlatormInterface.h"
-#include "vm_ProcessOpcode.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "platforminterface.h"
+#include "interpreter.h"
+#include "state.h"
 
 #include <stdbool.h>
 #include <stdio.h>

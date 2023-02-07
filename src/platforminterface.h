@@ -2,8 +2,8 @@
 #define VM_PLATFORM_INTERFACE_H
 
 #include <stdbool.h>
-#include "vm_BaseTypes.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "state.h"
 
 typedef void (*vm_ioFunction_t)(
     vm_state_t * state, vm_uint * argsBuffer, vm_uint * returnPointer);

@@ -1,7 +1,7 @@
-#include "test_Common.h"
-#include "vm_BaseTypes.h"
-#include "vm_Opcodes.h"
-#include "vm_ProcessOpcode.h"
+#include "test_common.h"
+#include "basetypes.h"
+#include "opcodes.h"
+#include "interpreter.h"
 
 #include <string.h>
 

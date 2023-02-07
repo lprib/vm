@@ -1,8 +1,8 @@
-#ifndef VM_PROCESS_OPCODE_H
-#define VM_PROCESS_OPCODE_H
+#ifndef VM_INTERPRETER_H
+#define VM_INTERPRETER_H
 
-#include "vm_BaseTypes.h"
-#include "vm_State.h"
+#include "basetypes.h"
+#include "state.h"
 
 typedef enum
 {
