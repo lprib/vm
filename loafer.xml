@@ -10,7 +10,8 @@
             <inc>impl/linux</inc>
             <src>impl/linux/interpreter_driver.c</src>
         </artifact>
-        <artifact id="integration" tags="exe">
+
+        <artifact id="integration_exe" tags="exe">
             <main>impl/integration_test/main.c</main>
         </artifact>
 
@@ -45,4 +46,11 @@
             <inc>src</inc>
         </tag>
     </tags>
+
+    <scripts>
+        <script id="integration">
+            <requires>integration_exe</requires>
+            <cmd>python3 ./impl/integration_test/regression_check.py</cmd>
+        </script>
+    </scripts>
 </project>
