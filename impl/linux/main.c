@@ -94,7 +94,7 @@ int main(int argc, char ** argv)
         break;
     }
 
-    vm_programTickResult_t run_result = li_RunProgram();
+    vm_tick_result_t run_result = li_RunProgram();
     switch (run_result)
     {
     case VM_PROCESS_CONTINUE:

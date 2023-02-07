@@ -15,13 +15,13 @@ static vm_uword_t stack[STACK_SIZE];
 
 // MOCKS
 
-void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uword_t val)
+void state_pushstack(vm_state_t * UNUSED_P(state), vm_uword_t val)
 {
     stack_idx--;
     stack[stack_idx] = val;
 }
 
-vm_uword_t vm_PopStack(vm_state_t * UNUSED_P(state))
+vm_uword_t state_popstack(vm_state_t * UNUSED_P(state))
 {
     vm_uword_t ret = stack[stack_idx];
     stack_idx++;
@@ -29,7 +29,7 @@ vm_uword_t vm_PopStack(vm_state_t * UNUSED_P(state))
     return ret;
 }
 
-vm_uword_t vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uword_t index)
+vm_uword_t state_peekstack(vm_state_t * UNUSED_P(state), vm_uword_t index)
 {
     return stack[stack_idx + index];
 }
@@ -58,7 +58,7 @@ static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
 static vm_ioFunctionRegistryItem_t testFnRegistry[2] = {
     {&NoArgsNoReturn, 0, false}, {&TwoArgsOneReturn, 2, true}};
 
-void vmint_GetIoFunctionRegistry(
+void interface_getiofns(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
@@ -80,7 +80,7 @@ TEST_DEFINE_CASE(NoArgsNoReturnNoPeek)
 
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
-    vm_IoFnCall(NULL, 0, false);
+    io_fncall(NULL, 0, false);
 
     ASSERT(noArgsNoReturnCalled);
     ASSERT(ItemsOnStack() == 0);
@@ -93,7 +93,7 @@ TEST_DEFINE_CASE(NoArgsNoReturnPeek)
 
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
-    vm_IoFnCall(NULL, 0, true);
+    io_fncall(NULL, 0, true);
 
     ASSERT(noArgsNoReturnCalled);
     ASSERT(ItemsOnStack() == 0);
@@ -111,7 +111,7 @@ TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
 
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
-    vm_IoFnCall(NULL, 1, false);
+    io_fncall(NULL, 1, false);
 
     ASSERT(twoArgsOneReturnCalled);
     // Return should be on the stack, along with args since they were peeked
@@ -131,7 +131,7 @@ TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
 
     // NOTE this assumes that vm_IoFnCall will never access state directly, but
     // only through mocked functions above
-    vm_IoFnCall(NULL, 1, true);
+    io_fncall(NULL, 1, true);
 
     ASSERT(twoArgsOneReturnCalled);
     // Return should be on the stack, along with args since they were peeked
@@ -143,12 +143,12 @@ TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
 
 int main(void)
 {
-    test_StartSuite();
+    test_startsuite();
 
     NoArgsNoReturnNoPeek();
     NoArgsNoReturnPeek();
     TwoArgsOneReturnNoPeek();
     TwoArgsOneReturnPeek();
 
-    test_EndSuite();
+    test_endsuite();
 }

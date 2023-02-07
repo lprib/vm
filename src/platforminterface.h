@@ -1,9 +1,10 @@
 #ifndef VM_PLATFORM_INTERFACE_H
 #define VM_PLATFORM_INTERFACE_H
 
-#include <stdbool.h>
 #include "basetypes.h"
 #include "state.h"
+
+#include <stdbool.h>
 
 typedef void (*vm_ioFunction_t)(
     vm_state_t * state, vm_uword_t * argsBuffer, vm_uword_t * returnPointer);
@@ -20,7 +21,7 @@ typedef struct
     bool hasReturn;
 } vm_ioFunctionRegistryItem_t;
 
-void vmint_GetIoFunctionRegistry(
+void interface_getiofns(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
     vm_uword_t * outRegistryListLength);
 

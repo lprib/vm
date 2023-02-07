@@ -59,7 +59,7 @@ static int MemWordsConsumed() { return test_state.pc - mem; }
 
 static void ProcessNextShouldContinue()
 {
-    ASSERT(vm_ProcessNextOpcode(&test_state) == VM_PROCESS_CONTINUE);
+    ASSERT(interpret_next_op(&test_state) == VM_PROCESS_CONTINUE);
 }
 
 // Outputs from mock
@@ -69,7 +69,7 @@ static bool lastPeekFlag = false;
 // Input to mock
 static bool functionIsValid;
 
-bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uword_t fnIndex, bool peek)
+bool io_fncall(vm_state_t * UNUSED_P(state), vm_uword_t fnIndex, bool peek)
 {
     lastIoFnIndex = fnIndex;
     lastPeekFlag = peek;
@@ -394,7 +394,7 @@ TEST_DEFINE_CASE(JumpsNotTaken)
 TEST_DEFINE_CASE(Halt)
 {
     ResetState(VM_OP_HALT, 0, 0, 0);
-    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    vm_tick_result_t res = interpret_next_op(&test_state);
     ASSERT(res == VM_PROCESS_PROGRAM_HALT);
     ASSERT(MemWordsConsumed() == 1);
 }
@@ -422,7 +422,7 @@ TEST_DEFINE_CASE(IoCallInvalid)
 {
     ResetState(VM_OP_IO, 5, 0, 0);
     functionIsValid = false;
-    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    vm_tick_result_t res = interpret_next_op(&test_state);
     ASSERT(lastIoFnIndex == 5);
     ASSERT(res == VM_PROCESS_ERROR_UNDEF_IO_FN);
     ASSERT(MemWordsConsumed() == 2);
@@ -431,13 +431,13 @@ TEST_DEFINE_CASE(IoCallInvalid)
 TEST_DEFINE_CASE(InvalidOpcode)
 {
     ResetState(65535, 0, 0, 0);
-    vm_programTickResult_t res = vm_ProcessNextOpcode(&test_state);
+    vm_tick_result_t res = interpret_next_op(&test_state);
     ASSERT(res == VM_PROCESS_ERROR_INVALID_OPCODE);
 }
 
 int main(void)
 {
-    test_StartSuite();
+    test_startsuite();
 
     Load();
     Store();
@@ -460,6 +460,6 @@ int main(void)
     IoCallInvalid();
     InvalidOpcode();
 
-    test_EndSuite();
+    test_endsuite();
     return 0;
 }

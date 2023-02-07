@@ -3,13 +3,13 @@
 #include "platforminterface.h"
 #include "state.h"
 
-bool vm_IoFnCall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
+bool io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
 {
     vm_ioFunctionRegistryItem_t * registryList;
     vm_uword_t registryListLength;
 
     // TODO optimization: init this at startup?
-    vmint_GetIoFunctionRegistry(&registryList, &registryListLength);
+    interface_getiofns(&registryList, &registryListLength);
 
     // Check whether the fnIndex is valid
     if (fnIndex > registryListLength)
@@ -28,14 +28,14 @@ bool vm_IoFnCall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
     for (int i = maxArgIndex; i >= 0; i--)
     {
         argsBuffer[i] =
-            peek ? vm_PeekStack(state, maxArgIndex - i) : vm_PopStack(state);
+            peek ? state_peekstack(state, maxArgIndex - i) : state_popstack(state);
     }
 
     registryItem->callback(state, argsBuffer, &returnValue);
 
     if (registryItem->hasReturn)
     {
-        vm_PushStack(state, returnValue);
+        state_pushstack(state, returnValue);
     }
 
     return true;

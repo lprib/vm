@@ -15,7 +15,7 @@ VM_DEFINE_IO_INTERFACE(PrintString)
     UNUSED(outReturn);
     vm_uword_t addr = args[0];
     vm_uword_t chr = 0;
-    while ((chr = vm_GetMem(state, addr)) != 0)
+    while ((chr = state_getmem(state, addr)) != 0)
     {
         printf("%c", chr);
         addr++;
@@ -44,7 +44,7 @@ VM_DEFINE_IO_INTERFACE(PrintChar)
 
 vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 
-void vmint_GetIoFunctionRegistry(
+void interface_getiofns(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
@@ -60,7 +60,7 @@ void li_InitInterpreter(int const mem_size, int const stack_size)
 {
     mem = (vm_uword_t *)calloc(mem_size, sizeof(vm_uword_t));
     stack = (vm_uword_t *)calloc(stack_size, sizeof(vm_uword_t));
-    vm_InitState(&state, stack, stack_size, mem, mem_size);
+    state_init(&state, stack, stack_size, mem, mem_size);
 }
 
 li_loadProgramResult_t li_LoadProgram(char const * filename)
@@ -83,12 +83,12 @@ li_loadProgramResult_t li_LoadProgram(char const * filename)
     return LOAD_SUCCESS;
 }
 
-vm_programTickResult_t li_RunProgram(void)
+vm_tick_result_t li_RunProgram(void)
 {
-    vm_programTickResult_t res;
+    vm_tick_result_t res;
     do
     {
-        res = vm_ProcessNextOpcode(&state);
+        res = interpret_next_op(&state);
     } while (res == VM_PROCESS_CONTINUE);
     return res;
 }

@@ -18,25 +18,25 @@ typedef struct
     vm_uword_t mem_size;
 } vm_state_t;
 
-void vm_InitState(
+void state_init(
     vm_state_t * state,
     vm_uword_t * stack,
     vm_uword_t stack_size,
     vm_uword_t * mem,
     vm_uword_t mem_size);
 
-void vm_PushStack(vm_state_t * state, vm_uword_t val);
+void state_pushstack(vm_state_t * state, vm_uword_t val);
 
-vm_uword_t vm_PopStack(vm_state_t * state);
+vm_uword_t state_popstack(vm_state_t * state);
 
-vm_uword_t vm_PeekStack(vm_state_t * state, vm_uword_t index);
+vm_uword_t state_peekstack(vm_state_t * state, vm_uword_t index);
 
-vm_uword_t vm_TakeStack(vm_state_t * state, vm_uword_t index);
+vm_uword_t state_takestack(vm_state_t * state, vm_uword_t index);
 
-vm_uword_t vm_GetProgramAndIncrement(vm_state_t * state);
+vm_uword_t state_nextinstr(vm_state_t * state);
 
-vm_uword_t vm_GetMem(vm_state_t* state, vm_uword_t addr);
+vm_uword_t state_getmem(vm_state_t* state, vm_uword_t addr);
 
-void vm_SetMem(vm_state_t* state, vm_uword_t addr, vm_uword_t val);
+void state_setmem(vm_state_t* state, vm_uword_t addr, vm_uword_t val);
 
 #endif

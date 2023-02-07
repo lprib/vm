@@ -57,7 +57,7 @@ enum
     MY_IO_FNS(GEN_IO_FN_ENUM_VALUE)
 };
 
-void vmint_GetIoFunctionRegistry(
+void interface_getiofns(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
@@ -134,11 +134,11 @@ vm_uword_t stack[STACK_SIZE] = {0};
 int main(void)
 {
     vm_state_t state;
-    vm_InitState(&state, stack, STACK_SIZE, mem, MEM_SIZE);
+    state_init(&state, stack, STACK_SIZE, mem, MEM_SIZE);
 
-    vm_programTickResult_t res;
+    vm_tick_result_t res;
     do
     {
-        res = vm_ProcessNextOpcode(&state);
+        res = interpret_next_op(&state);
     } while (res == VM_PROCESS_CONTINUE);
 }
