@@ -8,8 +8,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define POP_OR_PEEK(state, idx) \
-    peek ? state_peekstack(state, idx) : state_popstack(state)
+static inline vm_uword_t
+pop_or_peek(vm_state_t * state, bool peek, int peek_index)
+{
+    if (peek)
+        return state_peekstack(state, peek_index);
+    else
+        return state_popstack(state);
+}
 
 vm_tick_result_t interpret_next_op(vm_state_t * s)
 {
@@ -33,7 +39,7 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
     case VM_OP_STORE:
     {
         vm_uword_t addr = state_nextinstr(s);
-        vm_uword_t val = POP_OR_PEEK(s, 0);
+        vm_uword_t val = pop_or_peek(s, peek, 0);
         s->mem[addr] = val;
     }
     break;
@@ -46,7 +52,7 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 
     case VM_OP_DEREF:
     {
-        vm_uword_t addr = POP_OR_PEEK(s, 0);
+        vm_uword_t addr = pop_or_peek(s, peek, 0);
         state_pushstack(s, state_getmem(s, addr));
     }
     break;
@@ -57,7 +63,7 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
         vm_uword_t offset = state_nextinstr(s);
         vm_uword_t size = state_nextinstr(s);
 
-        vm_uword_t index = POP_OR_PEEK(s, 0);
+        vm_uword_t index = pop_or_peek(s, peek, 0);
         state_pushstack(s, state_getmem(s, base + index * size + offset));
     }
     break;
@@ -68,8 +74,8 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
         vm_uword_t offset = state_nextinstr(s);
         vm_uword_t size = state_nextinstr(s);
 
-        vm_uword_t index = POP_OR_PEEK(s, 0);
-        vm_uword_t val = POP_OR_PEEK(s, 1);
+        vm_uword_t index = pop_or_peek(s, peek, 0);
+        vm_uword_t val = pop_or_peek(s, peek, 1);
 
         state_setmem(s, base + index * size + offset, val);
     }
@@ -97,8 +103,8 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 
     case VM_OP_SWAP:
     {
-        vm_uword_t a = POP_OR_PEEK(s, 0);
-        vm_uword_t b = POP_OR_PEEK(s, 1);
+        vm_uword_t a = pop_or_peek(s, peek, 0);
+        vm_uword_t b = pop_or_peek(s, peek, 1);
         state_pushstack(s, a);
         state_pushstack(s, b);
     }
@@ -135,8 +141,8 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 #define GEN_JUMP_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uword_t r = POP_OR_PEEK(s, 0); \
-        vm_uword_t l = POP_OR_PEEK(s, 1); \
+        vm_uword_t r = pop_or_peek(s, peek, 0); \
+        vm_uword_t l = pop_or_peek(s, peek, 1); \
         vm_uword_t jumpDestination = state_nextinstr(s); \
         if (l op r) \
         { \
@@ -150,8 +156,8 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 #define GEN_UNSIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uword_t r = POP_OR_PEEK(s, 0); \
-        vm_uword_t l = POP_OR_PEEK(s, 1); \
+        vm_uword_t r = pop_or_peek(s, peek, 0); \
+        vm_uword_t l = pop_or_peek(s, peek, 1); \
         vm_uword_t res = op; \
         state_pushstack(s, res); \
     } \
@@ -162,24 +168,24 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 #define GEN_SIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uword_t r_unsigned = POP_OR_PEEK(s, 0); \
-        vm_uword_t l_unsigned = POP_OR_PEEK(s, 1); \
+        vm_uword_t r_unsigned = pop_or_peek(s, peek, 0); \
+        vm_uword_t l_unsigned = pop_or_peek(s, peek, 1); \
         vm_sword_t r = ((union { \
-                       vm_sword_t i; \
-                       vm_uword_t u; \
-                   }){.u = r_unsigned}) \
-                       .i; \
+                           vm_sword_t i; \
+                           vm_uword_t u; \
+                       }){.u = r_unsigned}) \
+                           .i; \
         vm_sword_t l = ((union { \
-                       vm_sword_t i; \
-                       vm_uword_t u; \
-                   }){.u = l_unsigned}) \
-                       .i; \
+                           vm_sword_t i; \
+                           vm_uword_t u; \
+                       }){.u = l_unsigned}) \
+                           .i; \
         vm_sword_t res_signed = op; \
         vm_sword_t res = ((union { \
-                         vm_sword_t i; \
-                         vm_uword_t u; \
-                     }){.i = res_signed}) \
-                         .u; \
+                             vm_sword_t i; \
+                             vm_uword_t u; \
+                         }){.i = res_signed}) \
+                             .u; \
         state_pushstack(s, res); \
     } \
     break;
@@ -189,7 +195,7 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
 #define GEN_UNSIGNED_UNARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uword_t n = POP_OR_PEEK(s, 0); \
+        vm_uword_t n = pop_or_peek(s, peek, 0); \
         state_pushstack(s, op); \
     } \
     break;
