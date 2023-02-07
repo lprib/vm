@@ -13,7 +13,7 @@
 
 vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 {
-    vm_uint raw_opcode = vm_GetProgramAndIncrement(s);
+    vm_uword_t raw_opcode = vm_GetProgramAndIncrement(s);
     bool peek = raw_opcode & VM_PEEK_BITMASK;
     // clear peek bit before switching
     vm_opcode_t opcode = (vm_opcode_t)(raw_opcode & ~VM_PEEK_BITMASK);
@@ -25,15 +25,15 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OP_LOAD:
     {
-        vm_uint addr = vm_GetProgramAndIncrement(s);
+        vm_uword_t addr = vm_GetProgramAndIncrement(s);
         vm_PushStack(s, s->mem[addr]);
     }
     break;
 
     case VM_OP_STORE:
     {
-        vm_uint addr = vm_GetProgramAndIncrement(s);
-        vm_uint val = POP_OR_PEEK(s, 0);
+        vm_uword_t addr = vm_GetProgramAndIncrement(s);
+        vm_uword_t val = POP_OR_PEEK(s, 0);
         s->mem[addr] = val;
     }
     break;
@@ -46,30 +46,30 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OP_DEREF:
     {
-        vm_uint addr = POP_OR_PEEK(s, 0);
+        vm_uword_t addr = POP_OR_PEEK(s, 0);
         vm_PushStack(s, vm_GetMem(s, addr));
     }
     break;
 
     case VM_OP_ARRAYLOAD:
     {
-        vm_uint base = vm_GetProgramAndIncrement(s);
-        vm_uint offset = vm_GetProgramAndIncrement(s);
-        vm_uint size = vm_GetProgramAndIncrement(s);
+        vm_uword_t base = vm_GetProgramAndIncrement(s);
+        vm_uword_t offset = vm_GetProgramAndIncrement(s);
+        vm_uword_t size = vm_GetProgramAndIncrement(s);
 
-        vm_uint index = POP_OR_PEEK(s, 0);
+        vm_uword_t index = POP_OR_PEEK(s, 0);
         vm_PushStack(s, vm_GetMem(s, base + index * size + offset));
     }
     break;
 
     case VM_OP_ARRAYSTORE:
     {
-        vm_uint base = vm_GetProgramAndIncrement(s);
-        vm_uint offset = vm_GetProgramAndIncrement(s);
-        vm_uint size = vm_GetProgramAndIncrement(s);
+        vm_uword_t base = vm_GetProgramAndIncrement(s);
+        vm_uword_t offset = vm_GetProgramAndIncrement(s);
+        vm_uword_t size = vm_GetProgramAndIncrement(s);
 
-        vm_uint index = POP_OR_PEEK(s, 0);
-        vm_uint val = POP_OR_PEEK(s, 1);
+        vm_uword_t index = POP_OR_PEEK(s, 0);
+        vm_uword_t val = POP_OR_PEEK(s, 1);
 
         vm_SetMem(s, base + index * size + offset, val);
     }
@@ -77,7 +77,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OP_PICK:
     {
-        vm_uint stackIndex = vm_GetProgramAndIncrement(s);
+        vm_uword_t stackIndex = vm_GetProgramAndIncrement(s);
         if (peek)
         {
             vm_PushStack(s, vm_PeekStack(s, stackIndex));
@@ -97,8 +97,8 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OP_SWAP:
     {
-        vm_uint a = POP_OR_PEEK(s, 0);
-        vm_uint b = POP_OR_PEEK(s, 1);
+        vm_uword_t a = POP_OR_PEEK(s, 0);
+        vm_uword_t b = POP_OR_PEEK(s, 1);
         vm_PushStack(s, a);
         vm_PushStack(s, b);
     }
@@ -118,7 +118,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 
     case VM_OP_IO:
     {
-        vm_uint fnIndex = vm_GetProgramAndIncrement(s);
+        vm_uword_t fnIndex = vm_GetProgramAndIncrement(s);
         if (!vm_IoFnCall(s, fnIndex, peek))
         {
             result = VM_PROCESS_ERROR_UNDEF_IO_FN;
@@ -135,9 +135,9 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define GEN_JUMP_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uint r = POP_OR_PEEK(s, 0); \
-        vm_uint l = POP_OR_PEEK(s, 1); \
-        vm_uint jumpDestination = vm_GetProgramAndIncrement(s); \
+        vm_uword_t r = POP_OR_PEEK(s, 0); \
+        vm_uword_t l = POP_OR_PEEK(s, 1); \
+        vm_uword_t jumpDestination = vm_GetProgramAndIncrement(s); \
         if (l op r) \
         { \
             s->pc = &s->mem[jumpDestination]; \
@@ -150,9 +150,9 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define GEN_UNSIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uint r = POP_OR_PEEK(s, 0); \
-        vm_uint l = POP_OR_PEEK(s, 1); \
-        vm_uint res = op; \
+        vm_uword_t r = POP_OR_PEEK(s, 0); \
+        vm_uword_t l = POP_OR_PEEK(s, 1); \
+        vm_uword_t res = op; \
         vm_PushStack(s, res); \
     } \
     break;
@@ -162,22 +162,22 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define GEN_SIGNED_BINARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uint r_unsigned = POP_OR_PEEK(s, 0); \
-        vm_uint l_unsigned = POP_OR_PEEK(s, 1); \
-        vm_int r = ((union { \
-                       vm_int i; \
-                       vm_uint u; \
+        vm_uword_t r_unsigned = POP_OR_PEEK(s, 0); \
+        vm_uword_t l_unsigned = POP_OR_PEEK(s, 1); \
+        vm_sword_t r = ((union { \
+                       vm_sword_t i; \
+                       vm_uword_t u; \
                    }){.u = r_unsigned}) \
                        .i; \
-        vm_int l = ((union { \
-                       vm_int i; \
-                       vm_uint u; \
+        vm_sword_t l = ((union { \
+                       vm_sword_t i; \
+                       vm_uword_t u; \
                    }){.u = l_unsigned}) \
                        .i; \
-        vm_int res_signed = op; \
-        vm_int res = ((union { \
-                         vm_int i; \
-                         vm_uint u; \
+        vm_sword_t res_signed = op; \
+        vm_sword_t res = ((union { \
+                         vm_sword_t i; \
+                         vm_uword_t u; \
                      }){.i = res_signed}) \
                          .u; \
         vm_PushStack(s, res); \
@@ -189,7 +189,7 @@ vm_programTickResult_t vm_ProcessNextOpcode(vm_state_t * s)
 #define GEN_UNSIGNED_UNARY_OPCODE_CASE(name, _numInlineArgs, op) \
     case VM_OP_##name: \
     { \
-        vm_uint n = POP_OR_PEEK(s, 0); \
+        vm_uword_t n = POP_OR_PEEK(s, 0); \
         vm_PushStack(s, op); \
     } \
     break;

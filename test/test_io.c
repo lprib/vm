@@ -11,25 +11,25 @@ TEST_DEFINE_SUITE(my_suite)
 
 #define STACK_SIZE 10
 static int stack_idx;
-static vm_uint stack[STACK_SIZE];
+static vm_uword_t stack[STACK_SIZE];
 
 // MOCKS
 
-void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uint val)
+void vm_PushStack(vm_state_t * UNUSED_P(state), vm_uword_t val)
 {
     stack_idx--;
     stack[stack_idx] = val;
 }
 
-vm_uint vm_PopStack(vm_state_t * UNUSED_P(state))
+vm_uword_t vm_PopStack(vm_state_t * UNUSED_P(state))
 {
-    vm_uint ret = stack[stack_idx];
+    vm_uword_t ret = stack[stack_idx];
     stack_idx++;
     ASSERT_MSG(stack_idx <= STACK_SIZE, "Tried to pop off of empty stack");
     return ret;
 }
 
-vm_uint vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uint index)
+vm_uword_t vm_PeekStack(vm_state_t * UNUSED_P(state), vm_uword_t index)
 {
     return stack[stack_idx + index];
 }
@@ -60,7 +60,7 @@ static vm_ioFunctionRegistryItem_t testFnRegistry[2] = {
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
-    vm_uint * outRegistryListLength)
+    vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = testFnRegistry;
     *outRegistryListLength = sizeof(testFnRegistry) / sizeof(testFnRegistry[0]);

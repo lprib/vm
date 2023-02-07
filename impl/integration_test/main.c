@@ -16,7 +16,7 @@ VM_DEFINE_IO_INTERFACE(Return1)
 VM_DEFINE_IO_INTERFACE(Arg1Return1)
 {
     UNUSED(state);
-    vm_uint arg = args[0];
+    vm_uword_t arg = args[0];
     *outReturn = arg * 3;
 }
 
@@ -30,7 +30,7 @@ VM_DEFINE_IO_INTERFACE(MyPrint)
 {
     UNUSED(state);
     UNUSED(outReturn);
-    vm_uint arg = args[0];
+    vm_uword_t arg = args[0];
     printf("%d\n", arg);
 }
 
@@ -38,8 +38,8 @@ VM_DEFINE_IO_INTERFACE(MyPrint2)
 {
     UNUSED(state);
     UNUSED(outReturn);
-    vm_uint arg0 = args[0];
-    vm_uint arg1 = args[1];
+    vm_uword_t arg0 = args[0];
+    vm_uword_t arg1 = args[1];
     printf("%d %d\n", arg0, arg1);
 }
 
@@ -59,7 +59,7 @@ enum
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
-    vm_uint * outRegistryListLength)
+    vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = fnRegistry;
     *outRegistryListLength = sizeof(fnRegistry) / sizeof(fnRegistry[0]);
@@ -75,7 +75,7 @@ void vmint_GetIoFunctionRegistry(
     X(MyPrint, 1, false) \
     X(MyPrint2, 2, false)
 */
-vm_uint mem[MEM_SIZE] = {
+vm_uword_t mem[MEM_SIZE] = {
     VM_OP_IO,
     FN_Return1,
     VM_OP_LOADIMM,
@@ -129,7 +129,7 @@ vm_uint mem[MEM_SIZE] = {
     VM_OP_HALT,
 };
 
-vm_uint stack[STACK_SIZE] = {0};
+vm_uword_t stack[STACK_SIZE] = {0};
 
 int main(void)
 {

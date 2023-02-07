@@ -6,7 +6,7 @@
 // clang-format off
 
 // store the peek flag in the high bits of opcode
-#define VM_PEEK_BITMASK (1 << (VM_INT_BITWIDTH - 1))
+#define VM_PEEK_BITMASK (1 << (VM_WORD_BITWIDTH - 1))
 
 // X(name, numInlineArgs, _tokens<unused>)
 #define VM_SPECIAL_OPCODES(x) \

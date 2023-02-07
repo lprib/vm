@@ -7,6 +7,6 @@
 #include <stdbool.h>
 
 // returns whether the fnIndex is a valid index
-bool vm_IoFnCall(vm_state_t * state, vm_uint fnIndex, bool peek);
+bool vm_IoFnCall(vm_state_t * state, vm_uword_t fnIndex, bool peek);
 
 #endif

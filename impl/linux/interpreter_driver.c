@@ -13,8 +13,8 @@
 VM_DEFINE_IO_INTERFACE(PrintString)
 {
     UNUSED(outReturn);
-    vm_uint addr = args[0];
-    vm_uint chr = 0;
+    vm_uword_t addr = args[0];
+    vm_uword_t chr = 0;
     while ((chr = vm_GetMem(state, addr)) != 0)
     {
         printf("%c", chr);
@@ -46,20 +46,20 @@ vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
-    vm_uint * outRegistryListLength)
+    vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = fnRegistry;
     *outRegistryListLength = sizeof(fnRegistry) / sizeof(fnRegistry[0]);
 }
 
 vm_state_t state;
-vm_uint * mem;
-vm_uint * stack;
+vm_uword_t * mem;
+vm_uword_t * stack;
 
 void li_InitInterpreter(int const mem_size, int const stack_size)
 {
-    mem = (vm_uint *)calloc(mem_size, sizeof(vm_uint));
-    stack = (vm_uint *)calloc(stack_size, sizeof(vm_uint));
+    mem = (vm_uword_t *)calloc(mem_size, sizeof(vm_uword_t));
+    stack = (vm_uword_t *)calloc(stack_size, sizeof(vm_uword_t));
     vm_InitState(&state, stack, stack_size, mem, mem_size);
 }
 
@@ -73,13 +73,13 @@ li_loadProgramResult_t li_LoadProgram(char const * filename)
 
     fseek(file, 0, SEEK_SET);
     size_t file_size = ftell(file);
-    if (file_size > (state.mem_size * sizeof(vm_uint)))
+    if (file_size > (state.mem_size * sizeof(vm_uword_t)))
     {
         fclose(file);
         return LOAD_FAILURE_NOT_ENOUGH_MEM;
     }
 
-    fread(mem, sizeof(vm_uint), state.mem_size, file);
+    fread(mem, sizeof(vm_uword_t), state.mem_size, file);
     return LOAD_SUCCESS;
 }
 

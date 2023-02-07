@@ -13,8 +13,8 @@ static vm_state_t NewTestState(void)
 {
     vm_state_t state;
 
-    vm_uint * stack = malloc(STACK_SIZE * sizeof(vm_uint));
-    vm_uint * mem = malloc(STACK_SIZE * sizeof(vm_uint));
+    vm_uword_t * stack = malloc(STACK_SIZE * sizeof(vm_uword_t));
+    vm_uword_t * mem = malloc(STACK_SIZE * sizeof(vm_uword_t));
 
     vm_InitState(&state, stack, STACK_SIZE, mem, MEM_SIZE);
 
@@ -29,11 +29,11 @@ static int ItemsOnStack(vm_state_t * state)
 TEST_DEFINE_CASE(Init)
 {
     vm_state_t test_state;
-    vm_uint const stack_size = 50;
-    vm_uint const mem_size = 100;
+    vm_uword_t const stack_size = 50;
+    vm_uword_t const mem_size = 100;
 
-    vm_uint stack[stack_size];
-    vm_uint mem[mem_size];
+    vm_uword_t stack[stack_size];
+    vm_uword_t mem[mem_size];
 
     test_state.pc = stack + 31;
     test_state.sp = mem + 41;

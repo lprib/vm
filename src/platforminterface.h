@@ -6,22 +6,22 @@
 #include "state.h"
 
 typedef void (*vm_ioFunction_t)(
-    vm_state_t * state, vm_uint * argsBuffer, vm_uint * returnPointer);
+    vm_state_t * state, vm_uword_t * argsBuffer, vm_uword_t * returnPointer);
 
 #define VM_DEFINE_IO_INTERFACE(name) \
-    void name(vm_state_t * state, vm_uint * args, vm_uint * outReturn)
+    void name(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 
 #define VM_IO_FN_MAX_ARGS 8
 
 typedef struct
 {
     vm_ioFunction_t callback;
-    vm_uint numArgs;
+    vm_uword_t numArgs;
     bool hasReturn;
 } vm_ioFunctionRegistryItem_t;
 
 void vmint_GetIoFunctionRegistry(
     vm_ioFunctionRegistryItem_t ** outRegistryList,
-    vm_uint * outRegistryListLength);
+    vm_uword_t * outRegistryListLength);
 
 #endif

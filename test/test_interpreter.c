@@ -8,8 +8,8 @@
 TEST_DEFINE_SUITE(ProcessOpcode)
 
 // start at 1 since we only mock 2 elements on the stack
-static vm_uint stack[100];
-static vm_uint mem[100];
+static vm_uword_t stack[100];
+static vm_uword_t mem[100];
 
 static vm_state_t test_state = {
     .pc = mem,
@@ -21,7 +21,7 @@ static vm_state_t test_state = {
     .mem_size = 100};
 
 static void
-ResetState(vm_uint mem0, vm_uint mem1, vm_uint stack0, vm_uint stack1)
+ResetState(vm_uword_t mem0, vm_uword_t mem1, vm_uword_t stack0, vm_uword_t stack1)
 {
     memset(stack, 0, sizeof(stack));
     memset(mem, 0, sizeof(mem));
@@ -37,7 +37,7 @@ ResetState(vm_uint mem0, vm_uint mem1, vm_uint stack0, vm_uint stack1)
 }
 
 static void ResetStateWithExtendedMemory(
-    vm_uint * new_mem, int new_mem_size, vm_uint stack0, vm_uint stack1)
+    vm_uword_t * new_mem, int new_mem_size, vm_uword_t stack0, vm_uword_t stack1)
 {
     memset(stack, 0, sizeof(stack));
     memset(mem, 0, sizeof(mem));
@@ -69,7 +69,7 @@ static bool lastPeekFlag = false;
 // Input to mock
 static bool functionIsValid;
 
-bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uint fnIndex, bool peek)
+bool vm_IoFnCall(vm_state_t * UNUSED_P(state), vm_uword_t fnIndex, bool peek)
 {
     lastIoFnIndex = fnIndex;
     lastPeekFlag = peek;
@@ -130,7 +130,7 @@ TEST_DEFINE_CASE(ArrayLoad)
 {
     // testing access of array at memory idx 5, struct offset 1, struct size 2,
     // index 2
-    vm_uint testmem[] = {
+    vm_uword_t testmem[] = {
         VM_OP_ARRAYLOAD,
         5,
         1,
@@ -164,12 +164,12 @@ TEST_DEFINE_CASE(ArrayLoad)
 
 TEST_DEFINE_CASE(ArrayStore)
 {
-    const vm_uint base = 4;
-    const vm_uint offset = 2;
-    const vm_uint size = 3;
-    const vm_uint index = 1;
+    const vm_uword_t base = 4;
+    const vm_uword_t offset = 2;
+    const vm_uword_t size = 3;
+    const vm_uword_t index = 1;
 
-    vm_uint testmem[] = {
+    vm_uword_t testmem[] = {
         VM_OP_ARRAYSTORE,
         base,
         offset,
@@ -316,24 +316,24 @@ TEST_DEFINE_CASE(Shifts)
     // sign-extended, stays negative
     ResetState(VM_OP_ASHR, 0, 2, -1024);
     ProcessNextShouldContinue();
-    ASSERT((vm_int)(*test_state.sp) == -256);
+    ASSERT((vm_sword_t)(*test_state.sp) == -256);
 
     // no sign-extend
     ResetState(VM_OP_LSHR, 0, 2, -1024);
     ProcessNextShouldContinue();
     // Does not keep sign bit
-    ASSERT((vm_int)(*test_state.sp) == (vm_int)16128);
+    ASSERT((vm_sword_t)(*test_state.sp) == (vm_sword_t)16128);
 
     // sign-extend
-    ResetState(VM_OP_ASHR, 0, 2, 1 << (VM_INT_BITWIDTH - 1));
+    ResetState(VM_OP_ASHR, 0, 2, 1 << (VM_WORD_BITWIDTH - 1));
     ProcessNextShouldContinue();
     // Should arithmetically divide the negative by 4
-    ASSERT((vm_int)(*test_state.sp) == (vm_int)(VM_INT_MIN / 4));
+    ASSERT((vm_sword_t)(*test_state.sp) == (vm_sword_t)(VM_SWORD_MIN / 4));
 
     // no sign extend, wraps to INT_MAX
-    ResetState(VM_OP_LSHR, 0, 1, 1 << (VM_INT_BITWIDTH - 1));
+    ResetState(VM_OP_LSHR, 0, 1, 1 << (VM_WORD_BITWIDTH - 1));
     ProcessNextShouldContinue();
-    ASSERT((vm_int)(*test_state.sp) == (1 << (VM_INT_BITWIDTH - 2)));
+    ASSERT((vm_sword_t)(*test_state.sp) == (1 << (VM_WORD_BITWIDTH - 2)));
 }
 
 TEST_DEFINE_CASE(UnaryOps)
