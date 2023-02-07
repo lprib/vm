@@ -51,14 +51,14 @@ VM_DEFINE_IO_INTERFACE(MyPrint2)
 #define GEN_IO_FN_REGISTRY_ITEM(name, args, hasReturn) {&name, args, hasReturn},
 #define GEN_IO_FN_ENUM_VALUE(name, args, hasReturn) FN_##name,
 
-vm_ioFunctionRegistryItem_t fnRegistry[] = {MY_IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
+io_fn_spec_t fnRegistry[] = {MY_IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 enum
 {
     MY_IO_FNS(GEN_IO_FN_ENUM_VALUE)
 };
 
 void interface_getiofns(
-    vm_ioFunctionRegistryItem_t ** outRegistryList,
+    io_fn_spec_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = fnRegistry;

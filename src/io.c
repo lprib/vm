@@ -5,7 +5,7 @@
 
 bool io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
 {
-    vm_ioFunctionRegistryItem_t * registryList;
+    io_fn_spec_t * registryList;
     vm_uword_t registryListLength;
 
     // TODO optimization: init this at startup?
@@ -17,7 +17,7 @@ bool io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
         return false;
     }
 
-    vm_ioFunctionRegistryItem_t * registryItem = &registryList[fnIndex];
+    io_fn_spec_t * registryItem = &registryList[fnIndex];
 
     vm_uword_t argsBuffer[VM_IO_FN_MAX_ARGS] = {0};
     vm_uword_t returnValue = 0;

@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-typedef void (*vm_ioFunction_t)(
+typedef void (*io_fn_t)(
     vm_state_t * state, vm_uword_t * argsBuffer, vm_uword_t * returnPointer);
 
 #define VM_DEFINE_IO_INTERFACE(name) \
@@ -16,13 +16,13 @@ typedef void (*vm_ioFunction_t)(
 
 typedef struct
 {
-    vm_ioFunction_t callback;
+    io_fn_t callback;
     vm_uword_t numArgs;
     bool hasReturn;
-} vm_ioFunctionRegistryItem_t;
+} io_fn_spec_t;
 
 void interface_getiofns(
-    vm_ioFunctionRegistryItem_t ** outRegistryList,
+    io_fn_spec_t ** outRegistryList,
     vm_uword_t * outRegistryListLength);
 
 #endif

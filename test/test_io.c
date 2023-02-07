@@ -55,11 +55,11 @@ static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
     *outReturn = 56;
 }
 
-static vm_ioFunctionRegistryItem_t testFnRegistry[2] = {
+static io_fn_spec_t testFnRegistry[2] = {
     {&NoArgsNoReturn, 0, false}, {&TwoArgsOneReturn, 2, true}};
 
 void interface_getiofns(
-    vm_ioFunctionRegistryItem_t ** outRegistryList,
+    io_fn_spec_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = testFnRegistry;

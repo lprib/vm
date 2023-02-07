@@ -42,10 +42,10 @@ VM_DEFINE_IO_INTERFACE(PrintChar)
 
 #define GEN_IO_FN_REGISTRY_ITEM(name, args, hasReturn) {&name, args, hasReturn},
 
-vm_ioFunctionRegistryItem_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
+io_fn_spec_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
 
 void interface_getiofns(
-    vm_ioFunctionRegistryItem_t ** outRegistryList,
+    io_fn_spec_t ** outRegistryList,
     vm_uword_t * outRegistryListLength)
 {
     *outRegistryList = fnRegistry;
