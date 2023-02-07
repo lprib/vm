@@ -125,10 +125,7 @@ vm_tick_result_t interpret_next_op(vm_state_t * s)
     case VM_OP_IO:
     {
         vm_uword_t fnIndex = state_nextinstr(s);
-        if (!io_fncall(s, fnIndex, peek))
-        {
-            result = VM_PROCESS_ERROR_UNDEF_IO_FN;
-        }
+        result = io_fncall(s, fnIndex, peek);
     }
     break;
 

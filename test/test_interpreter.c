@@ -69,11 +69,11 @@ static bool lastPeekFlag = false;
 // Input to mock
 static bool functionIsValid;
 
-bool io_fncall(vm_state_t * UNUSED_P(state), vm_uword_t fnIndex, bool peek)
+vm_tick_result_t io_fncall(vm_state_t * UNUSED_P(state), vm_uword_t fnIndex, bool peek)
 {
     lastIoFnIndex = fnIndex;
     lastPeekFlag = peek;
-    return functionIsValid;
+    return functionIsValid ? VM_PROCESS_CONTINUE : VM_PROCESS_ERROR_UNDEF_IO_FN;
 }
 
 // TEST CASES:

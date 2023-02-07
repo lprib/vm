@@ -1,42 +1,18 @@
 #include "test_common.h"
 #include "basetypes.h"
 #include "io.h"
-#include "platforminterface.h"
 #include "state.h"
+#include "opcodes.h"
+#include "interpreter.h"
 
 #include <stdbool.h>
 #include <string.h>
 
 TEST_DEFINE_SUITE(my_suite)
 
-#define STACK_SIZE 10
-static int stack_idx;
-static vm_uword_t stack[STACK_SIZE];
-
-// MOCKS
-
-void state_pushstack(vm_state_t * UNUSED_P(state), vm_uword_t val)
-{
-    stack_idx--;
-    stack[stack_idx] = val;
-}
-
-vm_uword_t state_popstack(vm_state_t * UNUSED_P(state))
-{
-    vm_uword_t ret = stack[stack_idx];
-    stack_idx++;
-    ASSERT_MSG(stack_idx <= STACK_SIZE, "Tried to pop off of empty stack");
-    return ret;
-}
-
-vm_uword_t state_peekstack(vm_state_t * UNUSED_P(state), vm_uword_t index)
-{
-    return stack[stack_idx + index];
-}
-
 static bool noArgsNoReturnCalled = false;
 
-static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn)
+static void NoArgsNoReturn(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 {
     UNUSED(state);
     UNUSED(args);
@@ -45,7 +21,7 @@ static VM_DEFINE_IO_INTERFACE(NoArgsNoReturn)
 }
 
 static bool twoArgsOneReturnCalled = false;
-static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
+static void TwoArgsOneReturn(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 {
     UNUSED(state);
     twoArgsOneReturnCalled = true;
@@ -55,90 +31,87 @@ static VM_DEFINE_IO_INTERFACE(TwoArgsOneReturn)
     *outReturn = 56;
 }
 
-static io_fn_spec_t testFnRegistry[2] = {
-    {&NoArgsNoReturn, 0, false}, {&TwoArgsOneReturn, 2, true}};
+vm_state_t state;
 
-void interface_getiofns(
-    io_fn_spec_t ** outRegistryList,
-    vm_uword_t * outRegistryListLength)
-{
-    *outRegistryList = testFnRegistry;
-    *outRegistryListLength = sizeof(testFnRegistry) / sizeof(testFnRegistry[0]);
-}
+vm_uword_t stack[100];
+vm_uword_t mem[100];
 
-static void ResetStack(void)
+static void ResetState(void)
 {
     memset(stack, 0, sizeof(stack));
-    stack_idx = STACK_SIZE;
+    memset(mem, 0, sizeof(mem));
+
+    state_init(&state, stack, 100, mem, 100);
+    io_register(&state, 0, (io_fn_spec_t){&NoArgsNoReturn, 0, false});
+    io_register(&state, 0, (io_fn_spec_t){&TwoArgsOneReturn, 2, true});
 }
-static int ItemsOnStack(void) { return STACK_SIZE - stack_idx; }
 
 TEST_DEFINE_CASE(NoArgsNoReturnNoPeek)
 {
-    ResetStack();
+    ResetState();
+    mem[0] = VM_OP_IO;
+    mem[1] = 0;
+    state_pushstack(&state, 999);
+
     noArgsNoReturnCalled = false;
 
-    // NOTE this assumes that vm_IoFnCall will never access state directly, but
-    // only through mocked functions above
-    io_fncall(NULL, 0, false);
+    ASSERT_EQ(interpret_next_op(&state), (vm_tick_result_t)VM_PROCESS_CONTINUE);
 
     ASSERT(noArgsNoReturnCalled);
-    ASSERT(ItemsOnStack() == 0);
+    ASSERT_EQ(state_getstackusage(&state), 1);
+    ASSERT_EQ(state_peekstack(&state, 0), 999);
 }
 
 TEST_DEFINE_CASE(NoArgsNoReturnPeek)
 {
-    ResetStack();
+    ResetState();
+    mem[0] = VM_OP_IO | VM_PEEK_BITMASK;
+    mem[1] = 0;
+
     noArgsNoReturnCalled = false;
 
-    // NOTE this assumes that vm_IoFnCall will never access state directly, but
-    // only through mocked functions above
-    io_fncall(NULL, 0, true);
+    ASSERT_EQ(interpret_next_op(&state), (vm_tick_result_t)VM_PROCESS_CONTINUE);
 
     ASSERT(noArgsNoReturnCalled);
-    ASSERT(ItemsOnStack() == 0);
+    ASSERT_EQ(state_getstackusage(&state), 0);
 }
 
 TEST_DEFINE_CASE(TwoArgsOneReturnNoPeek)
 {
-    ResetStack();
-    twoArgsOneReturnCalled = false;
+    ResetState();
+    mem[0] = VM_OP_IO | VM_PEEK_BITMASK;
+    mem[1] = 1;
 
     // Push args to stack
-    stack_idx = STACK_SIZE - 2;
-    stack[STACK_SIZE - 1] = 12;
-    stack[STACK_SIZE - 2] = 34;
+    state_pushstack(&state, 12);
+    state_pushstack(&state, 34);
+    twoArgsOneReturnCalled = false;
 
-    // NOTE this assumes that vm_IoFnCall will never access state directly, but
-    // only through mocked functions above
-    io_fncall(NULL, 1, false);
+    ASSERT_EQ(interpret_next_op(&state), (vm_tick_result_t)VM_PROCESS_CONTINUE);
 
     ASSERT(twoArgsOneReturnCalled);
-    // Return should be on the stack, along with args since they were peeked
-    ASSERT(ItemsOnStack() == 1);
-    ASSERT(stack[stack_idx] == 56);
+    ASSERT_EQ(state_getstackusage(&state), 1);
+    ASSERT_EQ(state_peekstack(&state, 0), 56);
 }
 
 TEST_DEFINE_CASE(TwoArgsOneReturnPeek)
 {
-    ResetStack();
-    twoArgsOneReturnCalled = false;
+    ResetState();
+    mem[0] = VM_OP_IO | VM_PEEK_BITMASK;
+    mem[1] = 1;
 
     // Push args to stack
-    stack_idx = STACK_SIZE - 2;
-    stack[STACK_SIZE - 1] = 12;
-    stack[STACK_SIZE - 2] = 34;
+    state_pushstack(&state, 12);
+    state_pushstack(&state, 34);
+    twoArgsOneReturnCalled = false;
 
-    // NOTE this assumes that vm_IoFnCall will never access state directly, but
-    // only through mocked functions above
-    io_fncall(NULL, 1, true);
+    ASSERT_EQ(interpret_next_op(&state), (vm_tick_result_t)VM_PROCESS_CONTINUE);
 
     ASSERT(twoArgsOneReturnCalled);
-    // Return should be on the stack, along with args since they were peeked
-    ASSERT(ItemsOnStack() == 3);
-    ASSERT(stack[stack_idx] == 56);
-    ASSERT(stack[stack_idx + 1] == 34);
-    ASSERT(stack[stack_idx + 2] == 12);
+    ASSERT_EQ(state_getstackusage(&state), 3);
+    ASSERT_EQ(state_popstack(&state), 56);
+    ASSERT_EQ(state_popstack(&state), 34);
+    ASSERT_EQ(state_popstack(&state), 12);
 }
 
 int main(void)

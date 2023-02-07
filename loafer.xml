@@ -15,16 +15,18 @@
         </artifact>
 
         <!-- Tests -->
-        <artifact id="testProcessOpcode" tags="test">
+        <artifact id="test_interpreter" tags="test">
             <main>test/test_interpreter.c</main>
             <src>src/interpreter.c</src>
             <src>src/state.c</src>
         </artifact>
-        <artifact id="testIo" tags="test">
+        <artifact id="test_io" tags="test">
             <main>test/test_io.c</main>
+            <src>src/state.c</src>
+            <src>src/interpreter.c</src>
             <src>src/io.c</src>
         </artifact>
-        <artifact id="testState" tags="test">
+        <artifact id="test_state" tags="test">
             <main>test/test_state.c</main>
             <src>src/state.c</src>
         </artifact>

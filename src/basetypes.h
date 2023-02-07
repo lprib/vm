@@ -4,6 +4,14 @@
 #include <limits.h>
 #include <stdbool.h>
 
+typedef enum
+{
+    VM_PROCESS_CONTINUE,
+    VM_PROCESS_PROGRAM_HALT,
+    VM_PROCESS_ERROR_UNDEF_IO_FN,
+    VM_PROCESS_ERROR_INVALID_OPCODE
+} vm_tick_result_t;
+
 typedef short vm_sword_t;
 typedef unsigned short vm_uword_t;
 

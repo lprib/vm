@@ -1,25 +1,18 @@
 #include "basetypes.h"
 #include "io.h"
-#include "platforminterface.h"
 #include "state.h"
 
-bool io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
+vm_tick_result_t io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
 {
-    io_fn_spec_t * registryList;
-    vm_uword_t registryListLength;
-
-    // TODO optimization: init this at startup?
-    interface_getiofns(&registryList, &registryListLength);
-
     // Check whether the fnIndex is valid
-    if (fnIndex > registryListLength)
+    if (fnIndex > IO_MAX_NUM_FNS)
     {
         return false;
     }
 
-    io_fn_spec_t * registryItem = &registryList[fnIndex];
+    io_fn_spec_t* registryItem = &state->io_fns[fnIndex];
 
-    vm_uword_t argsBuffer[VM_IO_FN_MAX_ARGS] = {0};
+    vm_uword_t argsBuffer[IO_MAX_NUM_ARGS] = {0};
     vm_uword_t returnValue = 0;
 
     // Fill args buffer in reverse since the oldest pushed value should be the
@@ -39,4 +32,9 @@ bool io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
     }
 
     return true;
+}
+
+void io_register(vm_state_t * state, vm_uword_t fn_index, io_fn_spec_t fn_spec)
+{
+    state->io_fns[fn_index] = fn_spec;
 }

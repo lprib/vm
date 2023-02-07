@@ -1,6 +1,8 @@
-#include "test_common.h"
 #include "basetypes.h"
 #include "state.h"
+#include "test_common.h"
+
+#include <string.h>
 
 TEST_DEFINE_SUITE(State)
 
@@ -21,27 +23,23 @@ static vm_state_t NewTestState(void)
     return state;
 }
 
-static int ItemsOnStack(vm_state_t * state)
-{
-    return state->stack_size - (state->sp - state->stack);
-}
+#define MY_STACKSIZE 50
+#define MY_MEMSIZE 100
 
 TEST_DEFINE_CASE(Init)
 {
     vm_state_t test_state;
-    vm_uword_t const stack_size = 50;
-    vm_uword_t const mem_size = 100;
 
-    vm_uword_t stack[stack_size];
-    vm_uword_t mem[mem_size];
+    vm_uword_t stack[MY_STACKSIZE] = {0};
+    vm_uword_t mem[MY_MEMSIZE] = {0};
 
     test_state.pc = stack + 31;
     test_state.sp = mem + 41;
 
-    state_init(&test_state, stack, stack_size, mem, mem_size);
+    state_init(&test_state, stack, MY_STACKSIZE, mem, MY_MEMSIZE);
 
-    ASSERT_MSG(test_state.pc == mem, "PC reset");
-    ASSERT_MSG(test_state.sp == stack + stack_size, "SP reset to top");
+    ASSERT_EQ(test_state.pc, &mem[0]);
+    ASSERT_EQ(test_state.sp, &stack[0] + MY_STACKSIZE);
 }
 
 TEST_DEFINE_CASE(PushPop)
@@ -50,14 +48,14 @@ TEST_DEFINE_CASE(PushPop)
     state_pushstack(&state, 1);
     state_pushstack(&state, 12);
 
-    ASSERT(state_popstack(&state) == 12);
+    ASSERT_EQ(state_popstack(&state), 12);
 
     state_pushstack(&state, 123);
     state_pushstack(&state, 1234);
 
-    ASSERT(state_popstack(&state) == 1234);
-    ASSERT(state_popstack(&state) == 123);
-    ASSERT(state_popstack(&state) == 1);
+    ASSERT_EQ(state_popstack(&state), 1234);
+    ASSERT_EQ(state_popstack(&state), 123);
+    ASSERT_EQ(state_popstack(&state), 1);
 }
 
 TEST_DEFINE_CASE(GetMemAndIncrement)
@@ -68,9 +66,9 @@ TEST_DEFINE_CASE(GetMemAndIncrement)
     state.mem[1] = 66;
     state.mem[2] = 77;
 
-    ASSERT(state_nextinstr(&state) == 55);
-    ASSERT(state_nextinstr(&state) == 66);
-    ASSERT(state_nextinstr(&state) == 77);
+    ASSERT_EQ(state_nextinstr(&state), 55);
+    ASSERT_EQ(state_nextinstr(&state), 66);
+    ASSERT_EQ(state_nextinstr(&state), 77);
 }
 
 TEST_DEFINE_CASE(Peek)
@@ -79,9 +77,9 @@ TEST_DEFINE_CASE(Peek)
     state_pushstack(&state, 77);
     state_pushstack(&state, 66);
     state_pushstack(&state, 55);
-    ASSERT(state_peekstack(&state, 0) == 55);
-    ASSERT(state_peekstack(&state, 1) == 66);
-    ASSERT(state_peekstack(&state, 2) == 77);
+    ASSERT_EQ(state_peekstack(&state, 0), 55);
+    ASSERT_EQ(state_peekstack(&state, 1), 66);
+    ASSERT_EQ(state_peekstack(&state, 2), 77);
 }
 
 TEST_DEFINE_CASE(Take)
@@ -90,19 +88,19 @@ TEST_DEFINE_CASE(Take)
     state_pushstack(&state, 77);
     state_pushstack(&state, 66);
     state_pushstack(&state, 55);
-    ASSERT(state_takestack(&state, 0) == 55);
-    ASSERT(state_popstack(&state) == 66);
-    ASSERT(state_popstack(&state) == 77);
-    ASSERT(ItemsOnStack(&state) == 0);
+    ASSERT_EQ(state_takestack(&state, 0), 55);
+    ASSERT_EQ(state_popstack(&state), 66);
+    ASSERT_EQ(state_popstack(&state), 77);
+    ASSERT_EQ(state_getstackusage(&state), 0);
 
     state = NewTestState();
     state_pushstack(&state, 77);
     state_pushstack(&state, 66);
     state_pushstack(&state, 55);
-    ASSERT(state_takestack(&state, 1) == 66);
-    ASSERT(state_popstack(&state) == 55);
-    ASSERT(state_popstack(&state) == 77);
-    ASSERT(ItemsOnStack(&state) == 0);
+    ASSERT_EQ(state_takestack(&state, 1), 66);
+    ASSERT_EQ(state_popstack(&state), 55);
+    ASSERT_EQ(state_popstack(&state), 77);
+    ASSERT_EQ(state_getstackusage(&state), 0);
 
     state = NewTestState();
     state_pushstack(&state, 77);
@@ -110,12 +108,24 @@ TEST_DEFINE_CASE(Take)
     state_pushstack(&state, 55);
     state_pushstack(&state, 44);
     state_pushstack(&state, 33);
-    ASSERT(state_takestack(&state, 3) == 66);
-    ASSERT(state_popstack(&state) == 33);
-    ASSERT(state_popstack(&state) == 44);
-    ASSERT(state_popstack(&state) == 55);
-    ASSERT(state_popstack(&state) == 77);
-    ASSERT(ItemsOnStack(&state) == 0);
+    ASSERT_EQ(state_takestack(&state, 3), 66);
+    ASSERT_EQ(state_popstack(&state), 33);
+    ASSERT_EQ(state_popstack(&state), 44);
+    ASSERT_EQ(state_popstack(&state), 55);
+    ASSERT_EQ(state_popstack(&state), 77);
+    ASSERT_EQ(state_getstackusage(&state), 0);
+}
+
+TEST_DEFINE_CASE(StackUsage)
+{
+    vm_state_t state = NewTestState();
+    ASSERT_EQ(state_getstackusage(&state), 0);
+    state_pushstack(&state, 1);
+    ASSERT_EQ(state_getstackusage(&state), 1);
+    state_pushstack(&state, 1);
+    ASSERT_EQ(state_getstackusage(&state), 2);
+    UNUSED(state_popstack(&state));
+    ASSERT_EQ(state_getstackusage(&state), 1);
 }
 
 int main(void)
@@ -127,6 +137,7 @@ int main(void)
     GetMemAndIncrement();
     Peek();
     Take();
+    StackUsage();
 
     test_endsuite();
     return 0;

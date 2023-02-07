@@ -1,8 +1,8 @@
 #include "interpreter_driver.h"
 
 #include "basetypes.h"
-#include "platforminterface.h"
 #include "interpreter.h"
+#include "io.h"
 #include "state.h"
 
 #include <stdbool.h>
@@ -10,7 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-VM_DEFINE_IO_INTERFACE(PrintString)
+static void
+PrintString(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 {
     UNUSED(outReturn);
     vm_uword_t addr = args[0];
@@ -22,35 +23,29 @@ VM_DEFINE_IO_INTERFACE(PrintString)
     }
 }
 
-VM_DEFINE_IO_INTERFACE(PrintDecimal)
+static void
+PrintDecimal(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 {
     UNUSED(state);
     UNUSED(outReturn);
     printf("%d", args[0]);
 }
 
-VM_DEFINE_IO_INTERFACE(PrintChar)
+static void
+PrintChar(vm_state_t * state, vm_uword_t * args, vm_uword_t * outReturn)
 {
     UNUSED(state);
     UNUSED(outReturn);
     printf("%c", args[0]);
 }
 
-// X(name, numArgs, hasReturn)
+// X(idx, name, numArgs, hasReturn)
 #define IO_FNS(x) \
-    x(PrintString, 1, false) x(PrintDecimal, 1, false) x(PrintChar, 1, false)
+    x(0, PrintString, 1, false) x(1, PrintDecimal, 1, false) \
+        x(2, PrintChar, 1, false)
 
-#define GEN_IO_FN_REGISTRY_ITEM(name, args, hasReturn) {&name, args, hasReturn},
-
-io_fn_spec_t fnRegistry[] = {IO_FNS(GEN_IO_FN_REGISTRY_ITEM)};
-
-void interface_getiofns(
-    io_fn_spec_t ** outRegistryList,
-    vm_uword_t * outRegistryListLength)
-{
-    *outRegistryList = fnRegistry;
-    *outRegistryListLength = sizeof(fnRegistry) / sizeof(fnRegistry[0]);
-}
+#define GEN_REGISTER(idx, name, numArgs, hasReturn) \
+    io_register(&state, idx, (io_fn_spec_t){&name, numArgs, hasReturn});
 
 vm_state_t state;
 vm_uword_t * mem;
@@ -61,6 +56,8 @@ void li_InitInterpreter(int const mem_size, int const stack_size)
     mem = (vm_uword_t *)calloc(mem_size, sizeof(vm_uword_t));
     stack = (vm_uword_t *)calloc(stack_size, sizeof(vm_uword_t));
     state_init(&state, stack, stack_size, mem, mem_size);
+
+    IO_FNS(GEN_REGISTER)
 }
 
 li_loadProgramResult_t li_LoadProgram(char const * filename)
@@ -99,10 +96,7 @@ void li_DestroyInterpreter(void)
     free(stack);
 }
 
-void li_PrintIoFunctions(void)
-{
-#define GEN_IO_FN_PRINT_STATEMENT(name, _numArgs, _hasReturn) \
+#define GEN_IO_FN_PRINT_STATEMENT(_idx, name, _numArgs, _hasReturn) \
     printf(#name "\n");
 
-    IO_FNS(GEN_IO_FN_PRINT_STATEMENT)
-}
+void li_PrintIoFunctions(void) { IO_FNS(GEN_IO_FN_PRINT_STATEMENT) }
