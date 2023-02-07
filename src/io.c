@@ -7,10 +7,15 @@ vm_tick_result_t io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
     // Check whether the fnIndex is valid
     if (fnIndex > IO_MAX_NUM_FNS)
     {
-        return false;
+        return VM_PROCESS_ERROR_UNDEF_IO_FN;
     }
 
     io_fn_spec_t* registryItem = &state->io_fns[fnIndex];
+    
+    if(!registryItem->callback)
+    {
+        return VM_PROCESS_ERROR_UNDEF_IO_FN;
+    }
 
     vm_uword_t argsBuffer[IO_MAX_NUM_ARGS] = {0};
     vm_uword_t returnValue = 0;
@@ -31,7 +36,7 @@ vm_tick_result_t io_fncall(vm_state_t * state, vm_uword_t fnIndex, bool peek)
         state_pushstack(state, returnValue);
     }
 
-    return true;
+    return VM_PROCESS_CONTINUE;
 }
 
 void io_register(vm_state_t * state, vm_uword_t fn_index, io_fn_spec_t fn_spec)

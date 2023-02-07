@@ -141,4 +141,6 @@ int main(void)
     {
         res = interpret_next_op(&state);
     } while (res == VM_PROCESS_CONTINUE);
+    printf("%d\n", res);
+    printf("%d\n", FN_Return1);
 }
