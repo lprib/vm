@@ -1,0 +1,10 @@
+set_io btn1 B22
+set_io btn2 B21
+set_io btn3 A27
+set_io btn4 A26
+
+set_io led1 A29
+set_io led2 B20
+set_io led3 B19
+set_io led4 A25
+set_io clk A9

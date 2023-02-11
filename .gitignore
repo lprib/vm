@@ -2,3 +2,7 @@ out/
 compile_commands.json
 .cache
 tags
+*.ghw
+work-obj*.cf
+*.json
+*.bin
