@@ -1,0 +1,3 @@
+[submodule "rtl/uvvm"]
+	path = rtl/uvvm
+	url = git@github.com:UVVM/UVVM_Light.git
